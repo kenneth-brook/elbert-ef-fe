@@ -1,6 +1,6 @@
 class ApiService {
   constructor() {
-    this.baseURL = 'https://8pz5kzj96d.execute-api.us-east-1.amazonaws.com/Prod/';
+    this.baseURL = 'https://5nutd3fl20.execute-api.us-east-1.amazonaws.com/Prod/';
   }
 
   async fetch(url, options = {}) {
