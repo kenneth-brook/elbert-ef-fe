@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/tabs.css">
+    <script src="./utils/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
+</head>
+<body>
+    <div class="menu">
+        <div class="logo-container">
+            <img src="img/logimg.png" alt="Logo" class="logo">
+        </div>
+        <nav id="navbar">
+            
+        </nav>
+    </div>
+    <main id="content">
+        <div class="tabs">
+            <ul class="tab-links">
+                <!-- Tabs will be inserted here dynamically -->
+            </ul>
+            <div class="tab-content">
+                <!-- Tab content will be inserted here dynamically -->
+            </div>
+        </div>
+    </main>
+    <script type="module" src="main.js"></script>
+</body>
+<script>
+    window.userRole = '{{userRole}}';
+</script>
+</html>

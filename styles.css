@@ -1,0 +1,154 @@
+/* Basic reset and background setup */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: black;
+}
+
+.background-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('img/e348b111b75280c2ce179af19462c5e8.jpg') no-repeat center center fixed;
+    background-size: cover;
+    animation: ripple-animation 45s infinite ease-in-out;
+    z-index: -1;  /* Ensures it's below all other content */
+}
+
+.background-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('img/e348b111b75280c2ce179af19462c5e8.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index: -2; /* Static image, behind the animated layer */
+}
+
+.background-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit; /* Inherits the same image as the ::after pseudo-element */
+    animation: ripple-animation 45s infinite ease-in-out;
+    filter: url('#water-effect');
+    opacity: 0.6; /* Adjust opacity to ensure both layers are visible */
+}
+
+.portInfo {
+    position: relative;
+    z-index: 2;
+    color: white;
+    text-align: center;
+}
+
+.portInfo {
+    position: relative;
+    z-index: 2;
+    color: white;
+}
+
+@keyframes ripple-animation {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+}
+
+.circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vh; /* 80% of the viewport height */
+    height: 80vh; /* Keeps width equal to the height */
+    background-color: white;
+    border-radius: 50%; /* Makes the div a circle */
+    z-index: 2; /* Ensures it appears above the background but below the text if necessary */
+    background: linear-gradient(180deg, #FFFFFF 42.5%, #93DCFC 79%);
+    box-sizing: border-box;
+    border: 20px solid white;
+    overflow: hidden;
+}
+
+.circle-glow {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120vh;
+    height: 120vh;
+    background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #FFFFFF 64.53%, rgba(128, 217, 255, 0.5) 66.53%, rgba(76, 197, 255, 0.411318) 72.53%, rgba(65, 149, 209, 0) 100%);
+    border-radius: 50%;
+    z-index: 1; /* Lower z-index than the circle */
+}
+
+.content {
+    position: absolute;
+    bottom: 0;
+    width: 100%; /* Fill the entire width of the circle */
+    height: 33%; /* Fill only 30% of the circle's height from the bottom */
+    background-color: #174771;
+    z-index: 1; /* Position it under the text but above the circle's background if necessary */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+
+.login-text {
+    color: #7DC1FF; /* Custom blue color */
+    letter-spacing: 4px; /* Wide spacing between letters */
+    margin-bottom: 10px;
+    font-size: 26px; /* Adjust size as needed */
+}
+
+.input-field {
+    width: 40%; /* Width relative to its container */
+    padding: 10px;
+    margin: 5px 0; /* Space between input fields */
+    background-color: #f4f4f4; /* Light gray background */
+    border: 2px solid #ccc; /* Gray border */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); /* Inset shadow for an 'inset' look */
+    text-align: center;
+}
+
+.login-button {
+    width: 7%; /* Adjust size as needed */
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.logImage {
+    position: relative;
+    height: 60%;
+    margin-top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    object-fit: contain;
+}

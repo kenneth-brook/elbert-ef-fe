@@ -1,0 +1,53 @@
+.menu {
+    width: 15%;
+    height: 100%;
+    background-color: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    overflow-y: auto;  /* Allow the menu itself to scroll if contents exceed screen height */
+    z-index: 1000;
+}
+
+.logo-container {
+    width: 90%;  /* Logo takes 95% of the menu width */
+    margin: 30px auto 0;  /* Centered horizontally and 30px from the top */
+    display: flex;
+    justify-content: center;  /* Center logo within the container */
+}
+
+.logo {
+    max-width: 100%;  /* Ensure logo fits within the container */
+    height: auto;  /* Maintain aspect ratio */
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 20px;  /* Space below the logo */
+}
+
+nav li {
+    padding: 10px 0;  /* Padding top and bottom */
+    display: flex;
+    justify-content: flex-end;  /* Align links to the right */
+    position: relative;  /* Needed for pseudo-element positioning */
+}
+
+nav li a {
+    text-decoration: none;
+    color: black;
+    padding-right: 10px;  /* Space for border extension */
+}
+
+nav li a::after {
+    content: "";
+    display: block;
+    width: 60%;  /* Border width as 80% of the menu's width */
+    border-bottom: 2px dotted #6CBAE7;  /* Dotted blue border */
+    position: absolute;
+    bottom: 0;
+    right: 10px;  /* Extend border 10px past the text */
+}
+
+

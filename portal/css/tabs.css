@@ -1,0 +1,387 @@
+.tabs {
+    padding: 8px 15px;
+    position: relative; /* Needed for pseudo-elements */
+}
+
+.tab-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Align tabs in a row */
+    white-space: nowrap; /* Prevents wrapping of tabs */
+}
+
+.tab-links li {
+    margin-right: -5px; /* Negative margin for overlap */
+    /*overflow: hidden;  Prevents border from spilling out */
+}
+
+.tab-links a {
+    padding: 8px 35px;
+    display: block;
+    background: #54B74A;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    position: relative;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.4); /* Adds depth */
+    clip-path: polygon(0 0, 90% 0%, 100% 100%, 0% 100%);
+    border-top-left-radius: 15px;
+    font-size: 2rem;
+}
+
+.tab-links a:hover,
+.tab-links a.active {
+    background: #006AAC;
+    color: white;
+    z-index: 12 !important;
+}
+
+.tab-content {
+    padding: 20px 50px 50px 50px;
+    border: 1px solid #ccc;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-top-right-radius: 15px;
+    background: #B6DAEA;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.tab {
+    display: none;
+}
+
+.tab.active {
+    display: block;
+}
+
+.toolbar, .eventToolbar {
+    padding: 20px;
+    background-color: #88C0E1;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.form-toggle {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-section {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.form-group {
+    width: 33%;
+    padding: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="text"], input[type="checkbox"], select,
+input[type="tel"], input[type="email"], input[type="url"] {
+    width: 50%;
+    padding: 8px;
+    margin-bottom: 10px;  /* Space between form elements */
+    background-color: #f4f4f4;  /* Light grey background, adjust as needed */
+    border: 2px solid #ccc;  /* Slightly darker border for definition */
+    border-radius: 5px;  /* Rounded corners */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);  /* Inner shadow for a 'cutout' effect */
+    transition: all 0.3s ease;  /* Smooth transition for hover effects */
+    box-sizing: border-box;  /* Includes padding and border in the element's total width and height */
+}
+
+input[type="text"]:focus, select:focus,
+input[type="tel"]:focus, input[type="email"]:focus, input[type="url"]:focus {
+    outline: none;  /* Removes the default focus outline */
+    border-color: #009688;  /* Highlight color when focused */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);  /* Deeper shadow for a more pronounced effect */
+}
+
+/* Specific styles for checkboxes, if they need to stand out */
+input[type="checkbox"] {
+    display: inline-block;  /* Default display is usually inline */
+    width: auto;  /* Override the width for text inputs */
+    margin-right: 5px;  /* Spacing before the label text */
+}
+
+input[type="submit"], button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+input[type="submit"]:hover, button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.form-section {
+    padding-bottom: 20px; /* Adds padding below the content within the section */
+    margin-bottom: 20px; /* Adds space between sections */
+    border-bottom: 2px solid black; /* Adds a black bottom border to each section */
+}
+
+.additional-form {
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 2px solid black;
+}
+
+/* Ensure the last section does not have a bottom border if not needed */
+.form-section:last-child {
+    border-bottom: none;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* Centers the children (form sections and submit button) horizontally */
+}
+
+form button, #saveBusinessButton {
+    background-color: #55B84B;
+    color: white;
+    font-size: 1.8rem;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    box-shadow: inset 3px 5px 8px rgba(0, 0, 0, 0.3);
+    text-shadow: 3px 5px 8px rgba(0, 0, 0, 0.3);
+}
+
+#saveBusinessButton {
+    margin: 0 auto;
+}
+
+#autofill-button, #add-social-media {
+    align-self: flex-start;
+}
+
+form button:hover {
+    box-shadow: inset -3px -5px 8px rgba(0, 0, 0, 0.3);
+    text-shadow: -3px -5px 8px rgba(0, 0, 0, 0.3);
+}
+
+#social-media-section .form-group {
+    width: 45%;
+}
+
+#social-media-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 100%;
+}
+
+#social-media-list li {
+    background-color: #f4f4f4;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#image-thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#image-thumbnails img.thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#image-file-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+#image-file-list li {
+    background-color: #f4f4f4;
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.description-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.description-container {
+    width: 50%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: #f4f4f4;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.description-container:focus-within {
+    border-color: #009688;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.tox-promotion {
+    display: none;
+}
+
+.thumbnail-container {
+    position: relative;
+    display: inline-block;
+    margin: 5px;
+}
+
+.thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.enlarge-thumbnail {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.remove-button {
+    display: block;
+    margin-top: 5px;
+    background-color: #ff0000 !important;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 1.3rem !important;
+    align-self: center;
+}
+
+.remove-button:hover {
+    background-color: #cc0000 !important;
+}
+
+.additional-info-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.additional-info-container select {
+    width: 40%;
+    padding: 8px;
+    margin-right: 10px;
+}
+
+.additional-info-container button {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.hours-table {
+    width: 50%;
+    margin: 0 auto;
+}
+
+/* Biz cards*/
+
+.business-section {
+    margin-top: 16px;
+  }
+  
+  .business-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px; /* Ensure there's space between the toolbar and the cards */
+  }
+  
+  .business-card {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin: 8px;
+    flex: 1 1 calc(50% - 32px);
+    box-sizing: border-box;
+  }
+  
+  .business-card h3 {
+    margin: 0 0 8px 0;
+  }
+  
+  .business-card p {
+    margin: 4px 0;
+  }
+  
+  .business-card button {
+    margin-right: 8px;
+  }
+
+  /* event cards*/
+
+  .events-section {
+    margin-top: 16px;
+  }
+  
+  .events-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px; /* Ensure there's space between the toolbar and the cards */
+  }
+  
+  .event-card {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin: 8px;
+    flex: 1 1 calc(50% - 32px); /* Two cards per row */
+    box-sizing: border-box;
+  }
+  
+  .event-card h3 {
+    margin: 0 0 8px 0;
+  }
+  
+  .event-card p {
+    margin: 4px 0;
+  }
+  
+  .event-card button {
+    margin-right: 8px;
+  }
