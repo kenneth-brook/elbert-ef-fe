@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const email = emailInput.value;
         const password = passwordInput.value;
 
-        fetch('https://8pz5kzj96d.execute-api.us-east-1.amazonaws.com/Stage/login', {
+        fetch('https://5nutd3fl20.execute-api.us-east-1.amazonaws.com/Prod/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
