@@ -349,7 +349,7 @@ export const attachImageUploadHandler = (formContainer, existingImageUrls = []) 
 // Display functions for Logo and Image
 function displayLogo(url, container, formContainer, file = null) {
     const img = document.createElement('img');
-    img.src = url.startsWith('data:') ? url : `https://douglas.365easyflow.com/easyflow-images/${url}`;
+    img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
     img.className = 'thumbnail';
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
@@ -371,7 +371,7 @@ function displayLogo(url, container, formContainer, file = null) {
 
 function displayImage(url, container, formContainer, file = null) {
     const img = document.createElement('img');
-    img.src = url.startsWith('data:') ? url : `https://douglas.365easyflow.com/easyflow-images/${url}`;
+    img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
     img.className = 'thumbnail';
 
     const removeButton = document.createElement('button');
@@ -604,7 +604,7 @@ async function uploadFile(file, formContainer, type) {
     formData.append('file', file, uniqueFilename);
 
     try {
-        const response = await fetch('https://douglas.365easyflow.com/easyflow-images/upload.php', {
+        const response = await fetch('https://elbert.365easyflow.com/easyflow-images/upload.php', {
             method: 'POST',
             body: formData,
         });
@@ -612,7 +612,7 @@ async function uploadFile(file, formContainer, type) {
         const result = await response.json();
 
         if (result && result[0]) {
-            const uploadedUrl = `https://douglas.365easyflow.com/easyflow-images/uploads/${uniqueFilename}`;
+            const uploadedUrl = `https://elbert.365easyflow.com/easyflow-images/uploads/${uniqueFilename}`;
             if (type === 'logo') {
                 formContainer.logoUrl = uploadedUrl;
             } else if (type === 'image') {
@@ -665,7 +665,7 @@ const getUniqueFilename = (filename) => {
 
 const uploadFilesToDreamHost = async (formData) => {
     try {
-        const response = await fetch('https://douglas.365easyflow.com/easyflow-images/upload.php', {
+        const response = await fetch('https://elbert.365easyflow.com/easyflow-images/upload.php', {
             method: 'POST',
             body: formData,
         });
