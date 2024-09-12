@@ -158,6 +158,7 @@ class BusinessesTab {
     
             const data = {
                 active: formData.get('active') ? 'true' : 'false',
+                chamberMember: formData.get('isMember') ? 'true' : 'false',
                 businessName: formData.get('businessName'),
                 streetAddress: formData.get('streetAddress'),
                 mailingAddress: formData.get('mailingAddress'),

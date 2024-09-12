@@ -10,6 +10,7 @@ import renderImageUploadSection from './formParts/imageUploadSection.js';
 import renderDescriptionSection from './formParts/descriptionSection.js';
 import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
 import renderSpecialDaySection from './formParts/specialDaySection.js';
+import { initializeStatusToggles } from './formHelpers/formStatusUtils.js';
 
 const apiService = new ApiService();
 
@@ -307,28 +308,8 @@ export const initializeEatForm = (formContainer, businessData) => {
     initializeTinyMCE('#description', businessData ? businessData.description : '');
     initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
 
-    const activeToggle = formContainer.querySelector('#active-toggle');
-    const toggleStatus = formContainer.querySelector('#toggle-status');
-
-    if (businessData && businessData.active) {
-        activeToggle.checked = true;
-        toggleStatus.textContent = 'Active';
-        toggleStatus.style.color = 'green';
-    } else {
-        activeToggle.checked = false;
-        toggleStatus.textContent = 'Inactive';
-        toggleStatus.style.color = 'red';
-    }
-
-    activeToggle.addEventListener('change', () => {
-        if (activeToggle.checked) {
-            toggleStatus.textContent = 'Active';
-            toggleStatus.style.color = 'green';
-        } else {
-            toggleStatus.textContent = 'Inactive';
-            toggleStatus.style.color = 'red';
-        }
-    });
+    // Use the extracted status toggle initialization
+    initializeStatusToggles(formContainer, businessData);
 };
 
 // TinyMCE initialization
