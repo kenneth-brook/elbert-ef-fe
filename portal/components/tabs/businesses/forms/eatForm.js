@@ -1,5 +1,15 @@
 import ApiService from '../../../../services/apiService.js';
 import config from '../../../../utils/config.js';
+import renderFormStatusToggle from './formParts/formStatusToggle.js';
+import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
+import renderLatLongSection from './formParts/latLongSection.js';
+import renderContactDetailsSection from './formParts/contactDetailsSection.js';
+import renderSocialMediaSection from './formParts/socialMediaSection.js';
+import renderLogoUploadSection from './formParts/logoUploadSection.js';
+import renderImageUploadSection from './formParts/imageUploadSection.js';
+import renderDescriptionSection from './formParts/descriptionSection.js';
+import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
+import renderSpecialDaySection from './formParts/specialDaySection.js';
 
 const apiService = new ApiService();
 
@@ -8,12 +18,7 @@ export const eatForm = () => {
     return `
         <form id="combined-form" enctype="multipart/form-data">
             <!-- Initial Business Form Fields -->
-            <div class="form-section">
-                <div class="form-toggle">
-                    <label id="toggle-label">Company is currently <span id="toggle-status" style="color: red;">Inactive</span></label>
-                    <input type="checkbox" id="active-toggle" name="active">
-                </div>
-            </div>
+            ${renderFormStatusToggle()}
             <div class="form-section">
                 <!-- Business Details -->
                 ${renderBusinessDetailsSection()}
@@ -49,139 +54,6 @@ export const eatForm = () => {
         </form>
     `;
 };
-
-// Rendering functions for different sections
-const renderBusinessDetailsSection = () => `
-    <div class="form-group">
-        <label for="businessName">Business Name:</label>
-        <input type="text" id="businessName" name="businessName">
-    </div>
-    <div class="form-group">
-        <label for="streetAddress">Street Address:</label>
-        <input type="text" id="streetAddress" name="streetAddress">
-    </div>
-    <div class="form-group">
-        <label for="mailingAddress">Mailing Address:</label>
-        <input type="text" id="mailingAddress" name="mailingAddress">
-    </div>
-    <div class="form-group">
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city">
-    </div>
-    <div class="form-group">
-        <label for="state">State:</label>
-        <input type="text" id="state" name="state">
-    </div>
-    <div class="form-group">
-        <label for="zipCode">Zip Code:</label>
-        <input type="text" id="zipCode" name="zipCode">
-    </div>
-`;
-
-const renderLatLongSection = () => `
-    <div class="form-group">
-        <label for="latitude">Latitude:</label>
-        <input type="text" id="latitude" name="latitude" readonly>
-    </div>
-    <div class="form-group">
-        <label for="longitude">Longitude:</label>
-        <input type="text" id="longitude" name="longitude" readonly>
-    </div>
-    <button type="button" id="autofill-button">Auto Fill</button>
-`;
-
-const renderContactDetailsSection = () => `
-    <div class="form-group">
-        <label for="phone">Phone:</label>
-        <input type="tel" id="phone" name="phone">
-    </div>
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email">
-    </div>
-    <div class="form-group">
-        <label for="website">Website:</label>
-        <input type="url" id="website" name="website">
-    </div>
-`;
-
-const renderSocialMediaSection = () => `
-    <div class="form-group">
-        <label for="socialPlatform">Social Platform:</label>
-        <input type="text" id="socialPlatform" name="socialPlatform">
-    </div>
-    <div class="form-group">
-        <label for="socialAddress">Social Address:</label>
-        <input type="text" id="socialAddress" name="socialAddress">
-    </div>
-    <button type="button" id="add-social-media">Add</button>
-    <ul id="social-media-list"></ul>
-`;
-
-const renderLogoUploadSection = () => `
-    <div class="form-group">
-        <label for="logoUpload">Business Logo:</label>
-        <input type="file" id="logoUpload" name="logoUrl" accept="image/*">
-    </div>
-    <div id="logo-preview" class="thumbnail-container"></div>
-`;
-
-const renderImageUploadSection = () => `
-    <div class="form-group">
-        <label for="imageUpload">Upload Images:</label>
-        <input type="file" id="imageUpload" name="imageUrls" multiple>
-    </div>
-    <div id="image-thumbnails"></div>
-    <ul id="image-file-list"></ul>
-`;
-
-const renderDescriptionSection = () => `
-    <div class="description-container">
-        <label for="description">Business Description:</label>
-        <textarea id="description" class="description" name="description"></textarea>
-    </div>
-`;
-
-const renderMenuSelectionSection = () => `
-    <div style="display: flex; flex-direction: row; gap: 20px; width: 100%;">
-        <div class="form-group">
-            <label for="menuType">Menu Type:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="menuType" name="menuType"></select>
-                <button type="button" id="add-menu-type">Add Selection</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="newMenuType">New Menu Type:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="text" id="newMenuType" name="newMenuType">
-                <button type="button" id="add-new-menu-type">Add</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="averageCost">Average Cost:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="averageCost" name="averageCost"></select>
-            </div>
-        </div>
-    </div>
-    <ul id="menu-type-list"></ul>
-`;
-
-const renderSpecialDaySection = () => `
-    <div class="special-day-container">
-        <label for="special-day">Special Day:</label>
-        <input type="text" id="special-day" class="special-day" name="special-day" />
-    </div>
-    <div class="altered-hours-container">
-        <label for="altered-hours">Altered Hours:</label>
-        <input type="text" id="altered-hours" class="altered-hours" name="altered-hours" />
-    </div>
-    <div class="add-day-container">
-        <button type="button" id="add-day-button">Add Day</button>
-    </div>
-    <div class="day-hours-list" id="day-hours-list"></div>
-`;
 
 // Coordinate handling
 export const attachCoordinatesHandler = (formContainer) => {
