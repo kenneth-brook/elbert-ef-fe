@@ -23,6 +23,7 @@ class Store {
 
     setSelectedBusinessType(type) {
         this.updateState({ selectedBusinessType: type });
+        console.log('Updated selectedBusinessType in store:', this.getState().selectedBusinessType);
     }
 
     getSelectedBusinessType() {
@@ -37,5 +38,6 @@ class Store {
     }
 }
 
-export default Store;
+const store = new Store();
+export default store;
 

@@ -1,10 +1,9 @@
 import Router from './services/router.js';
-import Store from './services/store.js';
+import store from './services/store.js';
 import ApiService from './services/apiService.js';
 import TabManager from './components/tabManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const store = new Store({ data: { combined: [] } });
     const router = new Router();
     const apiService = new ApiService();
 

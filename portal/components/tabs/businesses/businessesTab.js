@@ -5,9 +5,8 @@ import { shopForm, initializeShopFormWrapper } from './forms/shopForm.js';
 import { otherForm, initializeOtherFormWrapper } from './forms/otherForm.js';
 
 import ListBusinesses from './listBusinesses.js';
-import Store from '../../../services/store.js';
+import store from '../../../services/store.js';
 
-const store = new Store();
 
 class BusinessesTab {
     constructor(store, router, apiService) {
@@ -25,11 +24,15 @@ class BusinessesTab {
 
     showListBusinesses() {
         const contentArea = document.querySelector('.tab-content');
+        console.log('contentArea:', contentArea);
+        console.log('Type of contentArea:', typeof contentArea);
+        console.log('Is contentArea an instance of Element?', contentArea instanceof Element);
         if (!contentArea) {
             console.error("Content area element not found");
             return;
         }
         contentArea.innerHTML = '';
+        console.log('contentArea.innerHTML:', contentArea.innerHTML);
         const listBusinesses = new ListBusinesses(this.router, this.store, this.apiService);
         const renderedListBusinesses = listBusinesses.render();
         contentArea.appendChild(renderedListBusinesses);
@@ -70,32 +73,33 @@ class BusinessesTab {
         document.getElementById('select-business-type-button').addEventListener('click', () => {
             const selectedType = document.getElementById('business-type-select').value;
             console.log('business-type-select, just before store: ', selectedType)
-            this.store.setSelectedBusinessType(selectedType);
+            store.setSelectedBusinessType(selectedType);
+            console.log('Selected Business Type after setting to store:', store.getSelectedBusinessType());
             this.loadBusinessForm();
         });
     }
 
-    getFormAndInitializer(type) {
+    getFormAndInitializer(type, businessData = {}) {
         let formHtml, initializeForm;
         switch (type) {
             case 'eat':
-                formHtml = eatForm();
+                formHtml = eatForm(businessData);
                 initializeForm = initializeEatFormWrapper;
                 break;
             case 'stay':
-                formHtml = stayForm();
+                formHtml = stayForm(businessData);
                 initializeForm = initializeStayFormWrapper;
                 break;
             case 'play':
-                formHtml = playForm();
+                formHtml = playForm(businessData);
                 initializeForm = initializePlayFormWrapper;
                 break;
             case 'shop':
-                formHtml = shopForm();
+                formHtml = shopForm(businessData);
                 initializeForm = initializeShopFormWrapper;
                 break;
             case 'other':
-                formHtml = otherForm();
+                formHtml = otherForm(businessData);
                 initializeForm = initializeOtherFormWrapper;
                 break;
             default:
@@ -109,7 +113,7 @@ class BusinessesTab {
         return { formHtml, initializeForm };
     }
 
-    loadBusinessForm(type, businessData = null) {
+    loadBusinessForm(type = null, businessData = null) {
         // Retrieve the selected business type from the store if not provided
         const selectedType = type || this.store.getSelectedBusinessType();
         
@@ -119,13 +123,14 @@ class BusinessesTab {
             return;
         }
     
-        const { formHtml, initializeForm } = this.getFormAndInitializer(selectedType);
-        console.log('Returned from getFormAndInitializer:', { formHtml, initializeForm });
+        const { formHtml, initializeForm } = this.getFormAndInitializer(selectedType, businessData);
     
         const contentArea = document.querySelector('.tab-content');
         contentArea.innerHTML = formHtml;
     
-        this.initializeForm(contentArea, initializeForm, selectedType, businessData);
+        setTimeout(() => {
+            this.initializeForm(contentArea, initializeForm, selectedType, businessData);
+        }, 0);
     }
 
     async initializeForm(formContainer, initializeForm, type, businessData ) {

@@ -1,6 +1,6 @@
 import ApiService from '../../../../services/apiService.js';
 import config from '../../../../utils/config.js';
-import renderFormStatusToggle from './formParts/formStatusToggle.js';
+import { renderAndInitializeFormStatusToggle } from './formParts/formStatusToggle.js';
 import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
 import renderLatLongSection from './formParts/latLongSection.js';
 import renderContactDetailsSection from './formParts/contactDetailsSection.js';
@@ -10,16 +10,16 @@ import renderImageUploadSection from './formParts/imageUploadSection.js';
 import renderDescriptionSection from './formParts/descriptionSection.js';
 import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
 import renderSpecialDaySection from './formParts/specialDaySection.js';
-import { initializeStatusToggles } from './formHelpers/formStatusUtils.js';
 
 const apiService = new ApiService();
 
 // Main form template
-export const eatForm = () => {
+export const eatForm = (businessData = {}) => {
+    businessData = businessData || {};
     return `
         <form id="combined-form" enctype="multipart/form-data">
             <!-- Initial Business Form Fields -->
-            ${renderFormStatusToggle()}
+            ${renderAndInitializeFormStatusToggle(businessData)}
             <div class="form-section">
                 <!-- Business Details -->
                 ${renderBusinessDetailsSection()}
@@ -294,10 +294,24 @@ const initializeAverageCostDropdown = async (formContainer, selectedCost = null)
 
 // Initialize form components
 export const initializeEatForm = (formContainer, businessData) => {
+
+    console.log('formElement before calling renderAndInitializeFormStatusToggle:', formElement);
+    console.log('Type of formElement:', typeof formElement);
+    console.log('Is formElement an instance of Element?', formElement instanceof Element);
+    console.log('Does formElement have insertBefore?', typeof formElement.insertBefore);
+
+    const formElement = formContainer.querySelector('#combined-form');
+
+    if (!formElement) {
+        console.error('Form element not found in formContainer');
+        return;
+    }
+
     if (!formContainer.imageUrls) {
         formContainer.imageUrls = [];
     }
 
+    
     console.log('Received businessData in eatForm:', businessData);
     console.log('initializeEatForm called with formContainer:', formContainer);
 
@@ -308,8 +322,7 @@ export const initializeEatForm = (formContainer, businessData) => {
     initializeTinyMCE('#description', businessData ? businessData.description : '');
     initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
 
-    // Use the extracted status toggle initialization
-    initializeStatusToggles(formContainer, businessData);
+    renderAndInitializeFormStatusToggle(formElement, businessData);
 };
 
 // TinyMCE initialization
@@ -329,7 +342,7 @@ const initializeTinyMCE = (selector, content = '') => {
     });
 };
 
-export const initializeEatFormWrapper = (formContainer, businessData) => {
+export const initializeEatFormWrapper = (formContainer, businessData = {}) => {
     if (!businessData) {
         businessData = {}; // Set to an empty object if null to avoid accessing properties on null
     }
@@ -539,5 +552,5 @@ const uploadFilesToDreamHost = async (formData) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const formContainer = document.querySelector('.tab-content');
-    initializeEatForm(formContainer);
+    initializeEatForm(formContainer, businessData = {});
 });

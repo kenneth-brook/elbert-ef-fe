@@ -1,6 +1,6 @@
 import ApiService from '../../../../services/apiService.js';
 import config from '../../../../utils/config.js';
-import renderFormStatusToggle from './formParts/formStatusToggle.js';
+import { renderAndInitializeFormStatusToggle } from './formParts/formStatusToggle.js';
 import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
 import renderLatLongSection from './formParts/latLongSection.js';
 import renderContactDetailsSection from './formParts/contactDetailsSection.js';
@@ -10,16 +10,15 @@ import renderImageUploadSection from './formParts/imageUploadSection.js';
 import renderDescriptionSection from './formParts/descriptionSection.js';
 import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
 import renderSpecialDaySection from './formParts/specialDaySection.js';
-import { initializeStatusToggles } from './formHelpers/formStatusUtils.js';
 
 const apiService = new ApiService();
 
 // Main form template
-export const otherForm = () => {
+export const otherForm = (businessData = {}) => {
     return `
         <form id="combined-form" enctype="multipart/form-data">
             <!-- Initial Business Form Fields -->
-            ${renderFormStatusToggle()}
+            ${renderAndInitializeFormStatusToggle(businessData)}
             <div class="form-section">
                 <!-- Business Details -->
                 ${renderBusinessDetailsSection()}
