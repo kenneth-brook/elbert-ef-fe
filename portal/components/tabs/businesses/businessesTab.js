@@ -2,15 +2,18 @@ import { eatForm, initializeEatFormWrapper } from './forms/eatForm.js';
 import { stayForm, initializeStayFormWrapper } from './forms/stayForm.js';
 import { playForm, initializePlayFormWrapper } from './forms/playForm.js';
 import { shopForm, initializeShopFormWrapper } from './forms/shopForm.js';
+import { otherForm, initializeOtherFormWrapper } from './forms/otherForm.js';
 
 import ListBusinesses from './listBusinesses.js';
+import Store from '../../../services/store.js';
+
+const store = new Store();
 
 class BusinessesTab {
     constructor(store, router, apiService) {
         this.store = store;
         this.router = router;
         this.apiService = apiService;
-        console.log('apiService methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(apiService)));
         this.setupRoutes();
     }
 
@@ -56,6 +59,7 @@ class BusinessesTab {
                     <option value="stay">Stay</option>
                     <option value="play">Play</option>
                     <option value="shop">Shop</option>
+                    <option value="other">Other</option>
                 </select>
                 <button id="select-business-type-button">Select</button>
             </div>
@@ -65,7 +69,9 @@ class BusinessesTab {
 
         document.getElementById('select-business-type-button').addEventListener('click', () => {
             const selectedType = document.getElementById('business-type-select').value;
-            this.loadBusinessForm(selectedType);
+            console.log('business-type-select, just before store: ', selectedType)
+            this.store.setSelectedBusinessType(selectedType);
+            this.loadBusinessForm();
         });
     }
 
@@ -88,6 +94,10 @@ class BusinessesTab {
                 formHtml = shopForm();
                 initializeForm = initializeShopFormWrapper;
                 break;
+            case 'other':
+                formHtml = otherForm();
+                initializeForm = initializeOtherFormWrapper;
+                break;
             default:
                 console.error(`Unsupported business type: ${type}`);
                 return {};
@@ -100,11 +110,22 @@ class BusinessesTab {
     }
 
     loadBusinessForm(type, businessData = null) {
-        const { formHtml, initializeForm } = this.getFormAndInitializer(type);
+        // Retrieve the selected business type from the store if not provided
+        const selectedType = type || this.store.getSelectedBusinessType();
+        
+        // Ensure selectedType exists before proceeding
+        if (!selectedType) {
+            console.error("Selected business type is not set");
+            return;
+        }
+    
+        const { formHtml, initializeForm } = this.getFormAndInitializer(selectedType);
         console.log('Returned from getFormAndInitializer:', { formHtml, initializeForm });
+    
         const contentArea = document.querySelector('.tab-content');
         contentArea.innerHTML = formHtml;
-        this.initializeForm(contentArea, initializeForm, type, businessData);
+    
+        this.initializeForm(contentArea, initializeForm, selectedType, businessData);
     }
 
     async initializeForm(formContainer, initializeForm, type, businessData ) {
@@ -186,7 +207,7 @@ class BusinessesTab {
                 if (businessResponse && businessResponse.id) {
                     const businessId = businessResponse.id;
     
-                    if (['eat', 'play', 'shop', 'stay'].includes(businessType)) {
+                    if (['eat', 'play', 'shop', 'stay', 'other'].includes(businessType)) {
                         const detailsFormData = new URLSearchParams();
                         detailsFormData.append('businessId', businessId);
                         detailsFormData.append('menuTypes', JSON.stringify(menuTypes.map(mt => mt.id)));
@@ -227,6 +248,12 @@ class BusinessesTab {
                                 } else {
                                     await this.apiService.submitStayForm(detailsFormData);
                                 }
+                            } else if (businessType === 'other') {
+                                if (businessData && businessData.id) {
+                                    await this.apiService.updateOtherForm(businessId, detailsFormData);
+                                } else {
+                                    await this.apiService.submitOtherForm(detailsFormData);
+                                }
                             }
                         } catch (error) {
                             console.error('Error submitting additional form data:', error);
@@ -235,7 +262,7 @@ class BusinessesTab {
     
                     setTimeout(() => {
                         window.location.reload();
-                    }, 2000);
+                    }, 1500);
                 } else {
                     console.error('Business creation/update failed');
                 }
@@ -263,6 +290,10 @@ class BusinessesTab {
         const phoneInput = formContainer.querySelector('#phone');
         const emailInput = formContainer.querySelector('#email');
         const websiteInput = formContainer.querySelector('#website');
+
+        const activeToggle = formContainer.querySelector('#active-toggle');
+        const memberToggle = formContainer.querySelector('#member-toggle');
+        const memberStatusLabel = formContainer.querySelector('#toggle-member-status');
     
         if (businessNameInput) businessNameInput.value = businessData.name || '';
         if (streetAddressInput) streetAddressInput.value = businessData.street_address || '';
@@ -275,6 +306,19 @@ class BusinessesTab {
         if (phoneInput) phoneInput.value = businessData.phone || '';
         if (emailInput) emailInput.value = businessData.email || '';
         if (websiteInput) websiteInput.value = businessData.web || '';
+
+        console.log('Is Member Value:', businessData.chamber_member);
+
+        if (activeToggle) {
+            activeToggle.checked = businessData.active || false;
+        }
+    
+        // Handle Is Member Toggle
+        if (memberToggle) {
+            memberToggle.checked = businessData.chamber_member === true;
+            memberStatusLabel.textContent = memberToggle.checked ? 'Yes' : 'No';
+            memberStatusLabel.style.color = memberToggle.checked ? 'green' : 'red';
+        }
         
         // Handle TinyMCE content
         const checkTinyMCE = setInterval(() => {
@@ -303,6 +347,9 @@ class BusinessesTab {
                     break;
                 case 'shop':
                     menuTypes = businessData.shop_types || [];
+                    break;
+                case 'other':
+                    menuTypes = businessData.other_types || [];
                     break;
                 default:
                     console.error(`Unsupported business type: ${businessData.type}`);

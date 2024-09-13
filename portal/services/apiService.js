@@ -170,6 +170,31 @@ class ApiService {
     return response;
   }
 
+  async submitOtherForm(formData) {
+    const response = await this.fetch('other-form-submission', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    return response;
+  }
+
+  async updateOtherForm(businessId, formData) {
+    console.log('Menu Types before update:', formData.menuTypes);
+    const response = await this.fetch(`other-form-submission/${businessId}`, {
+        method: 'PUT',
+        body: formData,
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    });
+    return response;
+  }
+
   async deleteBusiness(businessId) {
     const response = await this.fetch(`form-submission/${businessId}`, {
         method: 'DELETE',

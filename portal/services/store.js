@@ -21,6 +21,14 @@ class Store {
         return this.state.userRole;
     }
 
+    setSelectedBusinessType(type) {
+        this.updateState({ selectedBusinessType: type });
+    }
+
+    getSelectedBusinessType() {
+        return this.state.selectedBusinessType;
+    }
+
     subscribe(listener) {
         this.listeners.push(listener);
         return () => {
@@ -30,3 +38,4 @@ class Store {
 }
 
 export default Store;
+
