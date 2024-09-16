@@ -19,7 +19,7 @@ export const eatForm = (businessData = {}) => {
     return `
         <form id="combined-form" enctype="multipart/form-data">
             <!-- Initial Business Form Fields -->
-            ${renderAndInitializeFormStatusToggle(businessData)}
+            
             <div class="form-section">
                 <!-- Business Details -->
                 ${renderBusinessDetailsSection()}
@@ -295,11 +295,6 @@ const initializeAverageCostDropdown = async (formContainer, selectedCost = null)
 // Initialize form components
 export const initializeEatForm = (formContainer, businessData) => {
 
-    console.log('formElement before calling renderAndInitializeFormStatusToggle:', formElement);
-    console.log('Type of formElement:', typeof formElement);
-    console.log('Is formElement an instance of Element?', formElement instanceof Element);
-    console.log('Does formElement have insertBefore?', typeof formElement.insertBefore);
-
     const formElement = formContainer.querySelector('#combined-form');
 
     if (!formElement) {
@@ -307,11 +302,15 @@ export const initializeEatForm = (formContainer, businessData) => {
         return;
     }
 
+    console.log('formElement before calling renderAndInitializeFormStatusToggle:', formElement);
+    console.log('Type of formElement:', typeof formElement);
+    console.log('Is formElement an instance of Element?', formElement instanceof Element);
+    console.log('Does formElement have insertBefore?', typeof formElement.insertBefore);
+
     if (!formContainer.imageUrls) {
         formContainer.imageUrls = [];
     }
 
-    
     console.log('Received businessData in eatForm:', businessData);
     console.log('initializeEatForm called with formContainer:', formContainer);
 
@@ -324,6 +323,7 @@ export const initializeEatForm = (formContainer, businessData) => {
 
     renderAndInitializeFormStatusToggle(formElement, businessData);
 };
+
 
 // TinyMCE initialization
 const initializeTinyMCE = (selector, content = '') => {

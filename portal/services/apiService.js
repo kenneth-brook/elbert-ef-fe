@@ -272,6 +272,7 @@ class ApiService {
       stay: `${this.baseURL}data/stay`,
       play: `${this.baseURL}data/play`,
       shop: `${this.baseURL}data/shop`,
+      other: `${this.baseURL}data/other`,
       events: `${this.baseURL}get-events`
     };
 
@@ -303,7 +304,7 @@ class ApiService {
         return acc;
       }, {});
 
-      dataMap.combined = [...dataMap.eat, ...dataMap.stay, ...dataMap.play, ...dataMap.shop].sort((a, b) => a.name.localeCompare(b.name));
+      dataMap.combined = [...dataMap.eat, ...dataMap.stay, ...dataMap.play, ...dataMap.shop, ...dataMap.other].sort((a, b) => a.name.localeCompare(b.name));
 
       return dataMap;
     } catch (error) {

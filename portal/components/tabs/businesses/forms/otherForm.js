@@ -18,7 +18,6 @@ export const otherForm = (businessData = {}) => {
     return `
         <form id="combined-form" enctype="multipart/form-data">
             <!-- Initial Business Form Fields -->
-            ${renderAndInitializeFormStatusToggle(businessData)}
             <div class="form-section">
                 <!-- Business Details -->
                 ${renderBusinessDetailsSection()}
@@ -46,7 +45,7 @@ export const otherForm = (businessData = {}) => {
             <div class="form-section" id="menu-selection-section">
                 ${renderMenuSelectionSection()}
             </div>
-            <div class="form-section special-day-section">
+            <div class="form-section special-day-section" style="display: none;">
                 ${renderSpecialDaySection()}
             </div>
             <input type="hidden" id="businessId" name="businessId" value="">
@@ -163,60 +162,85 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 };
 
 // Image upload handling
-export const attachImageUploadHandler = (formContainer, existingImageUrls = []) => {
-    if (!Array.isArray(existingImageUrls)) {
-        existingImageUrls = []; // Ensure it's an array
-    }
-
+export const attachImageUploadHandler = (formContainer) => {
     const imageUploadInput = formContainer.querySelector('#imageUpload');
     const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
     const imageFileListContainer = formContainer.querySelector('#image-file-list');
-
-    // Initialize formContainer.imageUrls with existing images, ensuring no duplicates
-    formContainer.imageUrls = [...new Set(existingImageUrls)];
-
-    // Display existing images
-    existingImageUrls.forEach(url => {
-        displayImage(url, imageThumbnailsContainer, formContainer);
-    });
-
-    // Define the event listener function before using it
-    const handleImageUpload = async () => {
+  
+    formContainer.imageUrls = [];
+  
+    if (imageUploadInput) {
+      imageUploadInput.addEventListener('change', async () => {
         const files = imageUploadInput.files;
-
-        // Avoid adding the same image multiple times
+  
         for (const file of files) {
-            const uniqueFilename = getUniqueFilename(file.name);
-            const imageFormData = new FormData();
-            imageFormData.append('imageFiles[]', file, uniqueFilename);
-
-            try {
-                const uploadResult = await uploadFilesToDreamHost(imageFormData);
-                if (uploadResult && uploadResult[0]) {
-                    const newUrl = `uploads/${uniqueFilename}`;
-                    if (!formContainer.imageUrls.includes(newUrl)) {
-                        formContainer.imageUrls.push(newUrl);
-                        console.log('Image URLs after adding new image:', formContainer.imageUrls);
-
-                        // Display the newly uploaded image
-                        displayImage(newUrl, imageThumbnailsContainer, formContainer);
-                    }
-                } else {
-                    console.error('Failed to upload image:', uploadResult);
-                }
-            } catch (error) {
-                console.error('Error during image upload:', error);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const thumbnailContainer = document.createElement('div');
+            thumbnailContainer.className = 'thumbnail-container';
+  
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = file.name;
+            img.className = 'thumbnail';
+  
+            img.addEventListener('mouseover', () => {
+              const enlargeImg = document.createElement('img');
+              enlargeImg.src = img.src;
+              enlargeImg.className = 'enlarge-thumbnail';
+              document.body.appendChild(enlargeImg);
+  
+              img.addEventListener('mousemove', (event) => {
+                enlargeImg.style.top = `${event.clientY + 15}px`;
+                enlargeImg.style.left = `${event.clientX + 15}px`;
+              });
+  
+              img.addEventListener('mouseout', () => {
+                document.body.removeChild(enlargeImg);
+              });
+            });
+  
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.className = 'remove-button';
+            removeButton.addEventListener('click', () => {
+              const index = formContainer.imageUrls.indexOf(file.name);
+              if (index > -1) {
+                formContainer.imageUrls.splice(index, 1);
+              }
+              imageThumbnailsContainer.removeChild(thumbnailContainer);
+              imageFileListContainer.removeChild(listItem);
+            });
+  
+            thumbnailContainer.appendChild(img);
+            thumbnailContainer.appendChild(removeButton);
+            imageThumbnailsContainer.appendChild(thumbnailContainer);
+  
+            const listItem = document.createElement('li');
+            listItem.textContent = file.name;
+            imageFileListContainer.appendChild(listItem);
+          };
+          reader.readAsDataURL(file);
+  
+          const uniqueFilename = getUniqueFilename(file.name);
+          const imageFormData = new FormData();
+          imageFormData.append('imageFiles[]', file, uniqueFilename);
+  
+          try {
+            const uploadResult = await uploadFilesToDreamHost(imageFormData);
+            if (uploadResult && uploadResult[0]) {
+              formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
+              console.log('Image URLs:', formContainer.imageUrls);
+            } else {
+              console.error('Failed to upload image:', uploadResult);
             }
+          } catch (error) {
+            console.error('Error during image upload:', error);
+          }
         }
-
-        // Clear the input after handling to prevent reprocessing the same files
-        imageUploadInput.value = '';
-    };
-
-    // Attach the event listener only once
-    imageUploadInput.removeEventListener('change', handleImageUpload);
-    imageUploadInput.addEventListener('change', handleImageUpload);
-};
+      });
+    }
+  };
 
 // Display functions for Logo and Image
 function displayLogo(url, container, formContainer, file = null) {
@@ -293,12 +317,24 @@ const initializeAverageCostDropdown = async (formContainer, selectedCost = null)
 
 // Initialize form components
 export const initializeOtherForm = (formContainer, businessData) => {
+    const formElement = formContainer.querySelector('#combined-form');
+
+    if (!formElement) {
+        console.error('Form element not found in formContainer');
+        return;
+    }
+
+    console.log('formElement before calling renderAndInitializeFormStatusToggle:', formElement);
+    console.log('Type of formElement:', typeof formElement);
+    console.log('Is formElement an instance of Element?', formElement instanceof Element);
+    console.log('Does formElement have insertBefore?', typeof formElement.insertBefore);
+
     if (!formContainer.imageUrls) {
         formContainer.imageUrls = [];
     }
 
     console.log('Received businessData in eatForm:', businessData);
-    console.log('initializeOtherForm called with formContainer:', formContainer);
+    console.log('initializeEatForm called with formContainer:', formContainer);
 
     attachCoordinatesHandler(formContainer);
     attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
@@ -307,9 +343,9 @@ export const initializeOtherForm = (formContainer, businessData) => {
     initializeTinyMCE('#description', businessData ? businessData.description : '');
     initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
 
-    // Use the extracted status toggle initialization
-    initializeStatusToggles(formContainer, businessData);
+    renderAndInitializeFormStatusToggle(formElement, businessData);
 };
+
 
 // TinyMCE initialization
 const initializeTinyMCE = (selector, content = '') => {
@@ -343,87 +379,93 @@ export const initializeOtherFormWrapper = (formContainer, businessData) => {
 };
 
 // Menu Selection logic
-export const initializeMenuSelection = async (formContainer, selectedMenuTypes = []) => {
-    console.log('Initializing menu selection with:', { formContainer, selectedMenuTypes });
+export const initializeMenuSelection = async (formContainer) => {
     const menuTypeDropdown = formContainer.querySelector('#menuType');
-    const menuTypeList = formContainer.querySelector('#menu-type-list');
+    const averageCostDropdown = formContainer.querySelector('#averageCost');
     const addMenuTypeButton = formContainer.querySelector('#add-menu-type');
-
-    if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton) {
-        console.error('One or more elements not found for Menu Selection initialization');
-        return;
-    }
-
+    const addNewMenuTypeButton = formContainer.querySelector('#add-new-menu-type');
+    const newMenuTypeInput = formContainer.querySelector('#newMenuType');
+    const menuTypeList = formContainer.querySelector('#menu-type-list');
+  
     const menuTypes = [];
-
-    // Fetch and populate the menu type dropdown
+  
     const fetchedMenuTypes = await getMenuTypes();
-    console.log('Fetched Menu Types:', fetchedMenuTypes);
-
     if (fetchedMenuTypes && Array.isArray(fetchedMenuTypes)) {
-        fetchedMenuTypes.forEach(type => {
-            const option = document.createElement('option');
-            option.value = type.id;
-            option.textContent = type.name;
-            menuTypeDropdown.appendChild(option);
-        });
-
-        //console.log('Selected Menu Types (from businessData I hope):', businessData);
-
-        selectedMenuTypes.forEach(selectedTypeId => {
-            const type = fetchedMenuTypes.find(t => String(t.id) === String(selectedTypeId));
-            if (type) {
-                const existingItem = menuTypeList.querySelector(`li[data-id="${type.id}"]`);
-                if (!existingItem) {
-                    const listItem = createMenuListItem(type.name, type.id);
-                    menuTypeList.appendChild(listItem);
-                    menuTypes.push({ id: type.id, name: type.name });
-                }
-            }
-        });
+      fetchedMenuTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type.id;
+        option.textContent = type.name;
+        menuTypeDropdown.appendChild(option);
+      });
     } else {
-        console.error('Error fetching menu types:', fetchedMenuTypes);
+      console.error('Error fetching menu types:', fetchedMenuTypes);
     }
-
-    // Add event listener for adding new selections
+  
+    const fetchedAverageCosts = await getAverageCosts();
+    if (fetchedAverageCosts && Array.isArray(fetchedAverageCosts)) {
+      fetchedAverageCosts.forEach(cost => {
+        const option = document.createElement('option');
+        option.value = cost.id;
+        option.textContent = `${cost.symbol} - ${cost.description}`;
+        averageCostDropdown.appendChild(option);
+      });
+    } else {
+      console.error('Error fetching average costs:', fetchedAverageCosts);
+    }
+  
     addMenuTypeButton.addEventListener('click', () => {
-        const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
-        if (selectedOption) {
-            const existingItem = menuTypeList.querySelector(`li[data-id="${selectedOption.value}"]`);
-            if (existingItem) {
-                console.log('This menu type is already added.');
-                return; // Prevent adding duplicates
-            }
-    
-            const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
-            menuTypeList.appendChild(listItem);
-            menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
-    
-            console.log('Menu Types after addition:', menuTypes);
-        }
+      const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
+      if (selectedOption) {
+        const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
+        menuTypeList.appendChild(listItem);
+        menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
+      }
     });
-
+  
+    addNewMenuTypeButton.addEventListener('click', async () => {
+      const newMenuType = newMenuTypeInput.value.trim();
+      if (newMenuType) {
+        const response = await addNewMenuType(newMenuType);
+        if (response && response.id) {
+          const option = document.createElement('option');
+          option.value = response.id;
+          option.textContent = newMenuType;
+          menuTypeDropdown.appendChild(option);
+  
+          const listItem = createMenuListItem(newMenuType, response.id);
+          menuTypeList.appendChild(listItem);
+          menuTypes.push({ id: response.id, name: newMenuType });
+  
+          newMenuTypeInput.value = '';
+        } else {
+          console.error('Error adding new menu type:', response);
+        }
+      }
+    });
+  
     formContainer.menuTypes = menuTypes;
-
-    // Helper function to create the list item
+  
     function createMenuListItem(name, id) {
-        const listItem = document.createElement('li');
-        listItem.textContent = name;
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'x';
-        removeButton.style.color = 'red';
-        removeButton.style.marginLeft = '10px';
-        removeButton.addEventListener('click', () => {
-            menuTypeList.removeChild(listItem);
-            const index = menuTypes.findIndex(type => type.id === id);
-            if (index > -1) {
-                menuTypes.splice(index, 1);
-            }
-        });
-        listItem.appendChild(removeButton);
-        return listItem;
+      const listItem = document.createElement('li');
+      listItem.textContent = name;
+      listItem.dataset.id = id;
+  
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'x';
+      removeButton.style.color = 'red';
+      removeButton.style.marginLeft = '10px';
+      removeButton.addEventListener('click', () => {
+        menuTypeList.removeChild(listItem);
+        const index = menuTypes.findIndex(type => type.id === id);
+        if (index > -1) {
+          menuTypes.splice(index, 1);
+        }
+      });
+  
+      listItem.appendChild(removeButton);
+      return listItem;
     }
-};
+  };
 
 // Fetch menu types from the backend
 export const getMenuTypes = async () => {
