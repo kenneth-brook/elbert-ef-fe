@@ -162,85 +162,91 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 };
 
 // Image upload handling
-export const attachImageUploadHandler = (formContainer) => {
+export const attachImageUploadHandler = (formContainer, existingImages = []) => {
+    // Ensure existingImages is always an array
+    existingImages = Array.isArray(existingImages) ? existingImages : [];
+
     const imageUploadInput = formContainer.querySelector('#imageUpload');
     const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
     const imageFileListContainer = formContainer.querySelector('#image-file-list');
-  
-    formContainer.imageUrls = [];
-  
-    if (imageUploadInput) {
-      imageUploadInput.addEventListener('change', async () => {
-        const files = imageUploadInput.files;
-  
-        for (const file of files) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const thumbnailContainer = document.createElement('div');
-            thumbnailContainer.className = 'thumbnail-container';
-  
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = file.name;
-            img.className = 'thumbnail';
-  
-            img.addEventListener('mouseover', () => {
-              const enlargeImg = document.createElement('img');
-              enlargeImg.src = img.src;
-              enlargeImg.className = 'enlarge-thumbnail';
-              document.body.appendChild(enlargeImg);
-  
-              img.addEventListener('mousemove', (event) => {
-                enlargeImg.style.top = `${event.clientY + 15}px`;
-                enlargeImg.style.left = `${event.clientX + 15}px`;
-              });
-  
-              img.addEventListener('mouseout', () => {
-                document.body.removeChild(enlargeImg);
-              });
-            });
-  
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
-            removeButton.className = 'remove-button';
-            removeButton.addEventListener('click', () => {
-              const index = formContainer.imageUrls.indexOf(file.name);
-              if (index > -1) {
+
+    // Initialize imageUrls with existing images
+    formContainer.imageUrls = [...existingImages];
+
+    // Function to display images (both existing and new)
+    const displayImage = (url, fileName, file = null, isExisting = false) => {
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.className = 'thumbnail-container';
+
+        const img = document.createElement('img');
+        img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
+        img.alt = fileName;
+        img.className = 'thumbnail';
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'remove-button';
+        removeButton.addEventListener('click', () => {
+            const index = formContainer.imageUrls.indexOf(isExisting ? url : `uploads/${fileName}`);
+            if (index > -1) {
                 formContainer.imageUrls.splice(index, 1);
-              }
-              imageThumbnailsContainer.removeChild(thumbnailContainer);
-              imageFileListContainer.removeChild(listItem);
-            });
-  
-            thumbnailContainer.appendChild(img);
-            thumbnailContainer.appendChild(removeButton);
-            imageThumbnailsContainer.appendChild(thumbnailContainer);
-  
-            const listItem = document.createElement('li');
-            listItem.textContent = file.name;
-            imageFileListContainer.appendChild(listItem);
-          };
-          reader.readAsDataURL(file);
-  
-          const uniqueFilename = getUniqueFilename(file.name);
-          const imageFormData = new FormData();
-          imageFormData.append('imageFiles[]', file, uniqueFilename);
-  
-          try {
-            const uploadResult = await uploadFilesToDreamHost(imageFormData);
-            if (uploadResult && uploadResult[0]) {
-              formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
-              console.log('Image URLs:', formContainer.imageUrls);
-            } else {
-              console.error('Failed to upload image:', uploadResult);
             }
-          } catch (error) {
-            console.error('Error during image upload:', error);
-          }
+            imageThumbnailsContainer.removeChild(thumbnailContainer);
+            imageFileListContainer.removeChild(listItem);
+        });
+
+        thumbnailContainer.appendChild(img);
+        thumbnailContainer.appendChild(removeButton);
+        imageThumbnailsContainer.appendChild(thumbnailContainer);
+
+        const listItem = document.createElement('li');
+        listItem.textContent = fileName;
+        imageFileListContainer.appendChild(listItem);
+
+        if (file) {
+            // Upload new file and update imageUrls
+            const uniqueFilename = getUniqueFilename(file.name);
+            const imageFormData = new FormData();
+            imageFormData.append('imageFiles[]', file, uniqueFilename);
+
+            uploadFilesToDreamHost(imageFormData)
+                .then((uploadResult) => {
+                    if (uploadResult && uploadResult[0]) {
+                        formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
+                        console.log('Image URLs:', formContainer.imageUrls);
+                    } else {
+                        console.error('Failed to upload image:', uploadResult);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error during image upload:', error);
+                });
+        } else {
+            console.log('Loaded existing image:', url);
         }
-      });
+    };
+
+    // Display existing images
+    existingImages.forEach((imageUrl) => {
+        const fileName = imageUrl.split('/').pop();
+        displayImage(imageUrl, fileName, null, true);
+    });
+
+    // Handle new image uploads
+    if (imageUploadInput) {
+        imageUploadInput.addEventListener('change', () => {
+            const files = imageUploadInput.files;
+
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    displayImage(e.target.result, file.name, file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
-  };
+};
 
 // Display functions for Logo and Image
 function displayLogo(url, container, formContainer, file = null) {
@@ -317,6 +323,10 @@ const initializeAverageCostDropdown = async (formContainer, selectedCost = null)
 
 // Initialize form components
 export const initializeOtherForm = (formContainer, businessData) => {
+    const existingImages = businessData.images || [];  // Ensure images are passed
+    console.log('Images passed to attachImageUploadHandler:', existingImages);
+
+
     const formElement = formContainer.querySelector('#combined-form');
 
     if (!formElement) {
@@ -324,28 +334,20 @@ export const initializeOtherForm = (formContainer, businessData) => {
         return;
     }
 
-    console.log('formElement before calling renderAndInitializeFormStatusToggle:', formElement);
-    console.log('Type of formElement:', typeof formElement);
-    console.log('Is formElement an instance of Element?', formElement instanceof Element);
-    console.log('Does formElement have insertBefore?', typeof formElement.insertBefore);
+    // Initialize imageUrls with existing data (from businessData)
+    formContainer.imageUrls = businessData.images || [];
 
-    if (!formContainer.imageUrls) {
-        formContainer.imageUrls = [];
-    }
-
-    console.log('Received businessData in eatForm:', businessData);
-    console.log('initializeEatForm called with formContainer:', formContainer);
-
+    // Populate other form fields
     attachCoordinatesHandler(formContainer);
     attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
     attachLogoUploadHandler(formContainer, businessData ? businessData.logoUrl : '');
-    attachImageUploadHandler(formContainer, businessData ? businessData.images : []);
+    attachImageUploadHandler(formContainer, existingImages, businessData ? businessData.images : []);
     initializeTinyMCE('#description', businessData ? businessData.description : '');
-    initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
 
     renderAndInitializeFormStatusToggle(formElement, businessData);
-};
 
+    console.log('Form initialized with image URLs:', formContainer.imageUrls);
+};
 
 // TinyMCE initialization
 const initializeTinyMCE = (selector, content = '') => {
