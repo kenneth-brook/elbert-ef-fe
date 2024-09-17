@@ -387,16 +387,53 @@ class BusinessesTab {
         }
     
         // Handle Images
-        formContainer.imageUrls = businessData.imageUrls || [];
-        const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
-        if (Array.isArray(businessData.imageUrls)) {
-            businessData.imageUrls.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                img.className = 'thumbnail';
-                imageThumbnailsContainer.appendChild(img);
-            });
+        console.log('formContainer.imageUrls before tab handle: ', formContainer.imageUrls);
+
+const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
+
+// Clear the thumbnails container to prevent duplicate rendering
+imageThumbnailsContainer.innerHTML = '';
+
+// If businessData.imageUrls exists, merge it with the existing formContainer.imageUrls
+if (Array.isArray(businessData.imageUrls)) {
+    businessData.imageUrls.forEach(url => {
+        if (!formContainer.imageUrls.includes(url)) {
+            formContainer.imageUrls.push(url); // Append only if it's not already in imageUrls
         }
+    });
+}
+
+console.log('formContainer.imageUrls after tab handle: ', formContainer.imageUrls);
+
+// Ensure thumbnails are displayed for the combined set of images with a remove button
+formContainer.imageUrls.forEach(url => {
+    const thumbnailContainer = document.createElement('div');
+    thumbnailContainer.className = 'thumbnail-container';
+
+    const img = document.createElement('img');
+    img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
+    img.className = 'thumbnail';
+    thumbnailContainer.appendChild(img);
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.className = 'remove-button';
+
+    // Add event listener to handle removal of the image
+    removeButton.addEventListener('click', () => {
+        const index = formContainer.imageUrls.indexOf(url);
+        if (index > -1) {
+            formContainer.imageUrls.splice(index, 1); // Remove from imageUrls array
+        }
+        imageThumbnailsContainer.removeChild(thumbnailContainer); // Remove the thumbnail
+    });
+
+    thumbnailContainer.appendChild(removeButton);
+    imageThumbnailsContainer.appendChild(thumbnailContainer);
+});
+
+
+
     
         // Handle Menu Types
         if (Array.isArray(businessData.menuTypes)) {

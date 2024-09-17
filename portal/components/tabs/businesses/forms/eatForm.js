@@ -164,108 +164,94 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 };
 
 // Image upload handling
-export const attachImageUploadHandler = (formContainer, existingImages = []) => {
+export const attachImageUploadHandler = (formContainer, existingImages ) => {
+    console.log('image url passing into attachImageUploadHandler: ', existingImages)
+    // Ensure existingImages is always an array
+    existingImages = Array.isArray(existingImages) ? existingImages : [];
+    console.log('image url passing after existingImages reasignment: ', existingImages)
+
     const imageUploadInput = formContainer.querySelector('#imageUpload');
     const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
     const imageFileListContainer = formContainer.querySelector('#image-file-list');
-  
+
     // Initialize imageUrls with existing images
-    formContainer.imageUrls = existingImages || [];
-  
-    // Render existing images
-    existingImages.forEach((imageUrl) => {
-      const thumbnailContainer = document.createElement('div');
-      thumbnailContainer.className = 'thumbnail-container';
-  
-      const img = document.createElement('img');
-      img.src = imageUrl; // Use the image URL directly
-      img.alt = ''; // Add alt text if available
-      img.className = 'thumbnail';
-  
-      // Add enlargement functionality if desired
-      // (You can add the same event listeners as in reader.onload)
-  
-      const removeButton = document.createElement('button');
-      removeButton.textContent = 'Remove';
-      removeButton.className = 'remove-button';
-      removeButton.addEventListener('click', () => {
-        const index = formContainer.imageUrls.indexOf(imageUrl);
-        if (index > -1) {
-          formContainer.imageUrls.splice(index, 1);
-        }
-        imageThumbnailsContainer.removeChild(thumbnailContainer);
-        imageFileListContainer.removeChild(listItem);
-      });
-  
-      thumbnailContainer.appendChild(img);
-      thumbnailContainer.appendChild(removeButton);
-      imageThumbnailsContainer.appendChild(thumbnailContainer);
-  
-      const listItem = document.createElement('li');
-      listItem.textContent = imageUrl.split('/').pop(); // Display the filename
-      imageFileListContainer.appendChild(listItem);
-    });
-  
-    if (imageUploadInput) {
-      imageUploadInput.addEventListener('change', async () => {
-        const files = imageUploadInput.files;
-  
-        for (const file of files) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            // Create thumbnail for the new image
-            const thumbnailContainer = document.createElement('div');
-            thumbnailContainer.className = 'thumbnail-container';
-  
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = file.name;
-            img.className = 'thumbnail';
-  
-            // Add enlargement functionality
-            // (Same as your existing code)
-  
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Remove';
-            removeButton.className = 'remove-button';
-            removeButton.addEventListener('click', () => {
-              const index = formContainer.imageUrls.indexOf(`uploads/${uniqueFilename}`);
-              if (index > -1) {
+    formContainer.imageUrls = [...existingImages];
+    console.log('image url after push to formContainer: ', formContainer.imageUrls)
+
+    // Function to display images (both existing and new)
+    const displayImage = (url, fileName, file = null, isExisting = false) => {
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.className = 'thumbnail-container';
+
+        const img = document.createElement('img');
+        img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
+        img.alt = fileName;
+        img.className = 'thumbnail';
+
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'remove-button';
+        removeButton.addEventListener('click', () => {
+            const index = formContainer.imageUrls.indexOf(isExisting ? url : `uploads/${fileName}`);
+            if (index > -1) {
                 formContainer.imageUrls.splice(index, 1);
-              }
-              imageThumbnailsContainer.removeChild(thumbnailContainer);
-              imageFileListContainer.removeChild(listItem);
-            });
-  
-            thumbnailContainer.appendChild(img);
-            thumbnailContainer.appendChild(removeButton);
-            imageThumbnailsContainer.appendChild(thumbnailContainer);
-  
-            const listItem = document.createElement('li');
-            listItem.textContent = file.name;
-            imageFileListContainer.appendChild(listItem);
-          };
-          reader.readAsDataURL(file);
-  
-          const uniqueFilename = getUniqueFilename(file.name);
-          const imageFormData = new FormData();
-          imageFormData.append('imageFiles[]', file, uniqueFilename);
-  
-          try {
-            const uploadResult = await uploadFilesToDreamHost(imageFormData);
-            if (uploadResult && uploadResult[0]) {
-              formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
-              console.log('Image URLs:', formContainer.imageUrls);
-            } else {
-              console.error('Failed to upload image:', uploadResult);
             }
-          } catch (error) {
-            console.error('Error during image upload:', error);
-          }
+            imageThumbnailsContainer.removeChild(thumbnailContainer);
+            imageFileListContainer.removeChild(listItem);
+        });
+
+        thumbnailContainer.appendChild(img);
+        thumbnailContainer.appendChild(removeButton);
+        imageThumbnailsContainer.appendChild(thumbnailContainer);
+
+        const listItem = document.createElement('li');
+        listItem.textContent = fileName;
+        imageFileListContainer.appendChild(listItem);
+
+        if (file) {
+            // Upload new file and update imageUrls
+            const uniqueFilename = getUniqueFilename(file.name);
+            const imageFormData = new FormData();
+            imageFormData.append('imageFiles[]', file, uniqueFilename);
+
+            uploadFilesToDreamHost(imageFormData)
+                .then((uploadResult) => {
+                    if (uploadResult && uploadResult[0]) {
+                        formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
+                        console.log('Image URLs:', formContainer.imageUrls);
+                    } else {
+                        console.error('Failed to upload image:', uploadResult);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error during image upload:', error);
+                });
+        } else {
+            console.log('Loaded existing image:', url);
         }
-      });
+    };
+
+    // Display existing images
+    existingImages.forEach((imageUrl) => {
+        const fileName = imageUrl.split('/').pop();
+        displayImage(imageUrl, fileName, null, true);
+    });
+
+    // Handle new image uploads
+    if (imageUploadInput) {
+        imageUploadInput.addEventListener('change', () => {
+            const files = imageUploadInput.files;
+
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    displayImage(e.target.result, file.name, file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     }
-  };  
+};
 
 // Display functions for Logo and Image
 function displayLogo(url, container, formContainer, file = null) {

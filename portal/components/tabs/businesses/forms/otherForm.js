@@ -162,9 +162,11 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 };
 
 // Image upload handling
-export const attachImageUploadHandler = (formContainer, existingImages = []) => {
+export const attachImageUploadHandler = (formContainer, existingImages ) => {
+    console.log('image url passing into attachImageUploadHandler: ', existingImages)
     // Ensure existingImages is always an array
     existingImages = Array.isArray(existingImages) ? existingImages : [];
+    console.log('image url passing after existingImages reasignment: ', existingImages)
 
     const imageUploadInput = formContainer.querySelector('#imageUpload');
     const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
@@ -172,6 +174,7 @@ export const attachImageUploadHandler = (formContainer, existingImages = []) => 
 
     // Initialize imageUrls with existing images
     formContainer.imageUrls = [...existingImages];
+    console.log('image url after push to formContainer: ', formContainer.imageUrls)
 
     // Function to display images (both existing and new)
     const displayImage = (url, fileName, file = null, isExisting = false) => {
@@ -268,30 +271,6 @@ function displayLogo(url, container, formContainer, file = null) {
         uploadFile(file, formContainer, 'logo');
     } else {
         formContainer.logoUrl = url; // Keep existing URL
-    }
-}
-
-function displayImage(url, container, formContainer, file = null) {
-    const img = document.createElement('img');
-    img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
-    img.className = 'thumbnail';
-
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.className = 'remove-button';
-    removeButton.addEventListener('click', () => {
-        container.removeChild(img);
-        container.removeChild(removeButton);
-        formContainer.imageUrls = formContainer.imageUrls.filter(imageUrl => imageUrl !== url); // Remove from the list
-    });
-
-    container.appendChild(img);
-    container.appendChild(removeButton);
-
-    if (file) {
-        uploadFile(file, formContainer, 'image');
-    } else {
-        formContainer.imageUrls.push(url); // Keep existing URL
     }
 }
 
