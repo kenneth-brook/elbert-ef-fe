@@ -337,11 +337,9 @@ export const initializeEatFormWrapper = (formContainer, businessData = {}) => {
         businessData = {}; // Set to an empty object if null to avoid accessing properties on null
     }
 
-    console.log('Received businessData in eatForm:', businessData);
     initializeEatForm(formContainer, businessData);
 
     const selectedMenuTypes = businessData.menu_types || []; // Safely access menu_types
-    console.log('Initializing menu selection with:', { formContainer, selectedMenuTypes });
 
     initializeMenuSelection(formContainer, businessData ? businessData.menu_types : []);
 };
@@ -492,7 +490,6 @@ export const addNewMenuType = async (newMenuType) => {
         return { id: Date.now(), name: newMenuType }; // Fallback in case of error
     }
 };
-
 
 // Fetch average costs from the backend
 export const getAverageCosts = async () => {

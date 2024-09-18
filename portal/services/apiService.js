@@ -196,23 +196,24 @@ class ApiService {
   }
 
   async deleteBusiness(businessId) {
-    const response = await this.fetch(`form-submission/${businessId}`, {
+    try {
+      const response = await this.fetch(`form-submission/${businessId}`, {
         method: 'DELETE',
         credentials: 'include',
-    });
-
-    if (!response.ok) {
+      });
+  
+      // Ensure the response is JSON and parse it
+      if (response && response.message === "Business deleted successfully") {
+        console.log('Delete response body:', response);
+        return response;  // Return the successful response directly
+      } else {
         console.error('Delete request failed with status:', response.status, response.statusText);
         throw new Error('Failed to delete business');
-    }
-
-    try {
-        const responseBody = await response.json();
-        console.log('Delete response body:', responseBody);
-        return responseBody;
+      }
+  
     } catch (error) {
-        console.error('Failed to parse response JSON:', error);
-        return { message: 'Business deleted successfully (no JSON response)' };
+      console.error('Error during delete request:', error);
+      throw new Error('Failed to delete business');
     }
   }
 
