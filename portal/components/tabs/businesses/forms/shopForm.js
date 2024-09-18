@@ -1,9 +1,16 @@
 import ApiService from '../../../../services/apiService.js';
 import config from '../../../../utils/config.js';
+import { renderAndInitializeFormStatusToggle } from './formParts/formStatusToggle.js';
+import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
+import renderLatLongSection from './formParts/latLongSection.js';
+import renderContactDetailsSection from './formParts/contactDetailsSection.js';
+import renderImageUploadSection from './formParts/imageUploadSection.js';
+import renderDescriptionSection from './formParts/descriptionSection.js';
+import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
 
 const apiService = new ApiService();
 
-export const shopForm = () => {
+export const shopForm = (businessData = {}) => {
     businessData = businessData || {};
     return `
     <form id="combined-form" enctype="multipart/form-data">
@@ -39,178 +46,6 @@ export const shopForm = () => {
     </form>
 `;
 };
-
-// Rendering functions for different sections
-const renderBusinessDetailsSection = () => `
-    <div class="form-group">
-        <label for="businessName">Business Name:</label>
-        <input type="text" id="businessName" name="businessName">
-    </div>
-    <div class="form-group">
-        <label for="streetAddress">Street Address:</label>
-        <input type="text" id="streetAddress" name="streetAddress">
-    </div>
-    <div class="form-group">
-        <label for="mailingAddress">Mailing Address:</label>
-        <input type="text" id="mailingAddress" name="mailingAddress">
-    </div>
-    <div class="form-group">
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city">
-    </div>
-    <div class="form-group">
-        <label for="state">State:</label>
-        <input type="text" id="state" name="state">
-    </div>
-    <div class="form-group">
-        <label for="zipCode">Zip Code:</label>
-        <input type="text" id="zipCode" name="zipCode">
-    </div>
-`;
-
-const renderLatLongSection = () => `
-    <div class="form-group">
-        <label for="latitude">Latitude:</label>
-        <input type="text" id="latitude" name="latitude" readonly>
-    </div>
-    <div class="form-group">
-        <label for="longitude">Longitude:</label>
-        <input type="text" id="longitude" name="longitude" readonly>
-    </div>
-    <button type="button" id="autofill-button">Auto Fill</button>
-`;
-
-const renderContactDetailsSection = () => `
-    <div class="form-group">
-        <label for="phone">Phone:</label>
-        <input type="tel" id="phone" name="phone">
-    </div>
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email">
-    </div>
-    <div class="form-group">
-        <label for="website">Website:</label>
-        <input type="url" id="website" name="website">
-    </div>
-`;
-
-const renderSocialMediaSection = () => `
-    <div class="form-group">
-        <label for="socialPlatform">Social Platform:</label>
-        <input type="text" id="socialPlatform" name="socialPlatform">
-    </div>
-    <div class="form-group">
-        <label for="socialAddress">Social Address:</label>
-        <input type="text" id="socialAddress" name="socialAddress">
-    </div>
-    <button type="button" id="add-social-media">Add</button>
-    <ul id="social-media-list"></ul>
-`;
-
-const renderLogoUploadSection = () => `
-    <div class="form-group">
-        <label for="logoUpload">Business Logo:</label>
-        <input type="file" id="logoUpload" name="logoUrl" accept="image/*">
-    </div>
-    <div id="logo-preview" class="thumbnail-container"></div>
-`;
-
-const renderImageUploadSection = () => `
-    <div class="form-group">
-        <label for="imageUpload">Upload Images:</label>
-        <input type="file" id="imageUpload" name="imageUrls" multiple>
-    </div>
-    <div id="image-thumbnails"></div>
-    <ul id="image-file-list"></ul>
-`;
-
-const renderDescriptionSection = () => `
-    <div class="description-container">
-        <label for="description">Business Description:</label>
-        <textarea id="description" class="description" name="description"></textarea>
-    </div>
-`;
-
-const renderMenuSelectionSection = () => `
-    <div style="display: flex; flex-direction: row; gap: 20px; width: 100%;">
-        <div class="form-group">
-            <label for="menuType">Menu Type:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="menuType" name="menuType"></select>
-                <button type="button" id="add-menu-type">Add Selection</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="newMenuType">New Menu Type:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="text" id="newMenuType" name="newMenuType">
-                <button type="button" id="add-new-menu-type">Add</button>
-            </div>
-        </div>
-    </div>
-    <ul id="menu-type-list"></ul>
-`;
-
-const renderOperationalHoursSection = () => `
-    <table class="hours-table">
-        <thead>
-            <tr>
-                <th>Day</th>
-                <th>Hours</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${renderOperationalHoursRows()}
-        </tbody>
-    </table>
-`;
-
-const renderOperationalHoursRows = () => `
-    <tr>
-        <td>Monday</td>
-        <td><input type="text" id="hours-monday" name="hours-monday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-    <tr>
-        <td>Tuesday</td>
-        <td><input type="text" id="hours-tuesday" name="hours-tuesday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-    <tr>
-        <td>Wednesday</td>
-        <td><input type="text" id="hours-wednesday" name="hours-wednesday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-    <tr>
-        <td>Thursday</td>
-        <td><input type="text" id="hours-thursday" name="hours-thursday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-    <tr>
-        <td>Friday</td>
-        <td><input type="text" id="hours-friday" name="hours-friday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-    <tr>
-        <td>Saturday</td>
-        <td><input type="text" id="hours-saturday" name="hours-saturday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-    <tr>
-        <td>Sunday</td>
-        <td><input type="text" id="hours-sunday" name="hours-sunday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-    </tr>
-`;
-
-const renderSpecialDaySection = () => `
-    <div class="special-day-container">
-        <label for="special-day">Special Day:</label>
-        <input type="text" id="special-day" class="special-day" name="special-day" />
-    </div>
-    <div class="altered-hours-container">
-        <label for="altered-hours">Altered Hours:</label>
-        <input type="text" id="altered-hours" class="altered-hours" name="altered-hours" />
-    </div>
-    <div class="add-day-container">
-        <button type="button" id="add-day-button">Add Day</button>
-    </div>
-    <div class="day-hours-list" id="day-hours-list"></div>
-`;
 
 // Coordinate handling
 export const attachCoordinatesHandler = (formContainer) => {
@@ -478,126 +313,186 @@ export const attachSpecialDayHandlers = (formContainer) => {
 
 // Initialize form components
 export const initializeShopForm = async (formContainer, businessData = null) => {
-  if (!formContainer.imageUrls) {
-      formContainer.imageUrls = [];
-  }
+    const formElement = formContainer.querySelector('#combined-form');
 
-  attachCoordinatesHandler(formContainer);
-  attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
-  attachLogoUploadHandler(formContainer, businessData ? businessData.logoUrl : '');
-  attachImageUploadHandler(formContainer, businessData ? businessData.images : []);
-  initializeTinyMCE('#description', businessData ? businessData.description : '');
-
-  // Update the checkbox and status label based on `businessData`
-    const activeToggle = formContainer.querySelector('#active-toggle');
-    const toggleStatus = formContainer.querySelector('#toggle-status');
-
-    if (businessData && businessData.active) {
-        activeToggle.checked = true;
-        toggleStatus.textContent = 'Active';
-        toggleStatus.style.color = 'green';
-    } else {
-        activeToggle.checked = false;
-        toggleStatus.textContent = 'Inactive';
-        toggleStatus.style.color = 'red';
+    if (!formElement) {
+        console.error('Form element not found in formContainer');
+        return;
     }
 
-    activeToggle.addEventListener('change', () => {
-        if (activeToggle.checked) {
-            toggleStatus.textContent = 'Active';
-            toggleStatus.style.color = 'green';
-        } else {
-            toggleStatus.textContent = 'Inactive';
-            toggleStatus.style.color = 'red';
-        }
-    });
+    if (!formContainer.imageUrls) {
+        formContainer.imageUrls = [];
+    }
+
+    attachCoordinatesHandler(formContainer);
+    //attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
+    attachLogoUploadHandler(formContainer, businessData ? businessData.logoUrl : '');
+    attachImageUploadHandler(formContainer, businessData ? businessData.images : []);
+    initializeTinyMCE('#description', businessData ? businessData.description : '');
+    //initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
+
+    renderAndInitializeFormStatusToggle(formElement, businessData);
 };
 
-export const initializeShopFormWrapper = (formContainer, businessData) => {
-  if (!businessData) {
-    businessData = {}; // Set to an empty object if null to avoid accessing properties on null
-  }
+export const initializeShopFormWrapper = (formContainer, businessData = {}) => {
+    if (!businessData) {
+        businessData = {}; // Set to an empty object if null to avoid accessing properties on null
+    }
+
+    console.log('Received businessData in eatForm:', businessData);
     initializeShopForm(formContainer, businessData);
-    initializeMenuSelection(formContainer, businessData ? businessData.shop_types : []);
+
+    const selectedMenuTypes = businessData.menu_types || []; // Safely access menu_types
+    console.log('Initializing menu selection with:', { formContainer, selectedMenuTypes });
+
+    initializeMenuSelection(formContainer, businessData ? businessData.menu_types : []);
 };
 
 // Menu Selection logic
 export const initializeMenuSelection = async (formContainer, selectedMenuTypes = []) => {
-  const menuTypeDropdown = formContainer.querySelector('#menuType');
-  const menuTypeList = formContainer.querySelector('#menu-type-list');
-  const addMenuTypeButton = formContainer.querySelector('#add-menu-type');
+    const menuTypeDropdown = formContainer.querySelector('#menuType');
+    const menuTypeList = formContainer.querySelector('#menu-type-list');
+    const addMenuTypeButton = formContainer.querySelector('#add-menu-type');
+    const addNewMenuTypeButton = formContainer.querySelector('#add-new-menu-type');
+    const newMenuTypeInput = formContainer.querySelector('#newMenuType'); // Ensure this exists
 
-  if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton) {
-      console.error('One or more elements not found for Menu Selection initialization');
-      return;
-  }
+    // Check if elements are available
+    if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton || !newMenuTypeInput) {
+        console.error('One or more elements not found for Menu Selection initialization');
+        console.log({ menuTypeDropdown, menuTypeList, addMenuTypeButton, newMenuTypeInput });
+        return;
+    }
 
-  const menuTypes = [];
+    document.getElementById('cancelButton').addEventListener('click', () => {
+        window.history.back();
+    });
 
-  // Fetch and populate the menu type dropdown
-  const fetchedMenuTypes = await getMenuTypes();
-  if (fetchedMenuTypes && Array.isArray(fetchedMenuTypes)) {
-      fetchedMenuTypes.forEach(type => {
-          const option = document.createElement('option');
-          option.value = type.id;
-          option.textContent = type.name;
-          menuTypeDropdown.appendChild(option);
-      });
+    const menuTypes = [];
 
-      selectedMenuTypes.forEach(selectedTypeId => {
-          const type = fetchedMenuTypes.find(t => String(t.id) === String(selectedTypeId));
-          if (type) {
-              const listItem = createMenuListItem(type.name, type.id);
-              menuTypeList.appendChild(listItem);
-              menuTypes.push({ id: type.id, name: type.name });
-          }
-      });
-  } else {
-      console.error('Error fetching menu types:', fetchedMenuTypes);
-  }
+    // Fetch and populate the menu type dropdown
+    const fetchedMenuTypes = await getMenuTypes();
+    console.log('Fetched Menu Types:', fetchedMenuTypes);
 
-  // Add event listener for adding new selections
-  addMenuTypeButton.addEventListener('click', () => {
-      const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
-      if (selectedOption) {
-          const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
-          menuTypeList.appendChild(listItem);
-          menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
-      }
-  });
+    if (fetchedMenuTypes && Array.isArray(fetchedMenuTypes)) {
+        // Clear dropdown before populating
+        menuTypeDropdown.innerHTML = '';
+        
+        fetchedMenuTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.name;
+            menuTypeDropdown.appendChild(option);
+        });
 
-  formContainer.menuTypes = menuTypes;
+        // Populate the selected menu types in the list
+        selectedMenuTypes.forEach(selectedTypeId => {
+            const type = fetchedMenuTypes.find(t => String(t.id) === String(selectedTypeId));
+            if (type) {
+                const existingItem = menuTypeList.querySelector(`li[data-id="${type.id}"]`);
+                if (!existingItem) {
+                    const listItem = createMenuListItem(type.name, type.id);
+                    menuTypeList.appendChild(listItem);
+                    menuTypes.push({ id: type.id, name: type.name });
+                }
+            }
+        });
+    } else {
+        console.error('Error fetching menu types:', fetchedMenuTypes);
+    }
 
-  // Helper function to create the list item
-  function createMenuListItem(name, id) {
-      const listItem = document.createElement('li');
-      listItem.textContent = name;
-      const removeButton = document.createElement('button');
-      removeButton.textContent = 'x';
-      removeButton.style.color = 'red';
-      removeButton.style.marginLeft = '10px';
-      removeButton.addEventListener('click', () => {
-          menuTypeList.removeChild(listItem);
-          const index = menuTypes.findIndex(type => type.id === id);
-          if (index > -1) {
-              menuTypes.splice(index, 1);
-          }
-      });
-      listItem.appendChild(removeButton);
-      return listItem;
-  }
+    // Add event listener for "Add Selection" button
+    addMenuTypeButton.addEventListener('click', () => {
+        const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
+        if (selectedOption) {
+            const existingItem = menuTypeList.querySelector(`li[data-id="${selectedOption.value}"]`);
+            if (existingItem) {
+                console.log('This menu type is already added.');
+                return; // Prevent adding duplicates
+            }
+
+            const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
+            menuTypeList.appendChild(listItem);
+            menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
+
+            console.log('Menu Types after addition:', menuTypes);
+        }
+    });
+
+    // Add event listener for "Add New Menu Type" button
+    addNewMenuTypeButton.addEventListener('click', async () => {
+        const newMenuType = newMenuTypeInput.value.trim();
+        if (newMenuType) {
+            const response = await addNewMenuType(newMenuType); // Ensure addNewMenuType is defined
+            if (response && response.id) {
+                const option = document.createElement('option');
+                option.value = response.id;
+                option.textContent = newMenuType;
+                menuTypeDropdown.appendChild(option);
+
+                const listItem = createMenuListItem(newMenuType, response.id);
+                menuTypeList.appendChild(listItem);
+                menuTypes.push({ id: response.id, name: newMenuType });
+
+                newMenuTypeInput.value = ''; // Clear the input field
+            } else {
+                console.error('Error adding new menu type:', response);
+            }
+        }
+    });
+
+    formContainer.menuTypes = menuTypes;
+
+    // Helper function to create the list item
+    function createMenuListItem(name, id) {
+        const listItem = document.createElement('li');
+        listItem.textContent = name;
+        listItem.dataset.id = id; // Ensure to set a data attribute for the id
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'x';
+        removeButton.style.color = 'red';
+        removeButton.style.marginLeft = '10px';
+        removeButton.addEventListener('click', () => {
+            menuTypeList.removeChild(listItem);
+            const index = menuTypes.findIndex(type => type.id === id);
+            if (index > -1) {
+                menuTypes.splice(index, 1);
+            }
+        });
+        listItem.appendChild(removeButton);
+        return listItem;
+    }
 };
 
 // Fetch menu types from the backend
 export const getMenuTypes = async () => {
-  const tableName = `shop_type`;
-  try {
-      const response = await apiService.fetch(`menu-types?table=${tableName}`);
-      return response;
-  } catch (error) {
-      console.error(`Error fetching menu types:`, error);
-      return [];
-  }
+    const tableName = `shop_type`;
+    try {
+        const response = await apiService.fetch(`menu-types?table=${tableName}`);
+        console.log('Menu Types API response:', response);
+        return response;
+    } catch (error) {
+        console.error(`Error fetching menu types:`, error);
+        return [];
+    }
+};
+
+// Add new menu type to the backend
+export const addNewMenuType = async (newMenuType) => {
+    const tableName = `shop_type`;
+    try {
+        const response = await apiService.fetch('menu-types', {
+            method: 'POST',
+            body: JSON.stringify({ name: newMenuType, table: tableName }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('New Menu Type API response:', response);
+        return response;
+    } catch (error) {
+        console.error(`Error adding new menu type:`, error);
+        return { id: Date.now(), name: newMenuType }; // Fallback in case of error
+    }
 };
 
 // Handle file uploads
@@ -628,6 +523,32 @@ async function uploadFile(file, formContainer, type) {
       console.error('Error uploading file:', error);
   }
 }
+
+const getUniqueFilename = (filename) => {
+    const date = new Date().toISOString().replace(/[-:.]/g, '');
+    return `${date}_${filename}`;
+};
+
+const uploadFilesToDreamHost = async (formData) => {
+    try {
+        const response = await fetch('https://elbert.365easyflow.com/easyflow-images/upload.php', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const responseBody = await response.text();
+        const result = JSON.parse(responseBody);
+
+        if (result.length === 0) {
+            throw new Error('Upload to DreamHost failed: empty result');
+        }
+
+        return result;
+    } catch (error) {
+        console.error('Error uploading files:', error);
+        throw error;
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   const formContainer = document.querySelector('.tab-content');
