@@ -157,10 +157,7 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 
 // Image upload handling
 export const attachImageUploadHandler = (formContainer, existingImages ) => {
-    console.log('image url passing into attachImageUploadHandler: ', existingImages)
-    // Ensure existingImages is always an array
     existingImages = Array.isArray(existingImages) ? existingImages : [];
-    console.log('image url passing after existingImages reasignment: ', existingImages)
 
     const imageUploadInput = formContainer.querySelector('#imageUpload');
     const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');

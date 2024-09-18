@@ -1,226 +1,51 @@
 import ApiService from '../../../../services/apiService.js';
 import config from '../../../../utils/config.js';
+import { renderAndInitializeFormStatusToggle } from './formParts/formStatusToggle.js';
+import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
+import renderLatLongSection from './formParts/latLongSection.js';
+import renderContactDetailsSection from './formParts/contactDetailsSection.js';
+import renderImageUploadSection from './formParts/imageUploadSection.js';
+import renderDescriptionSection from './formParts/descriptionSection.js';
+import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
 
 const apiService = new ApiService();
 
-export const playForm = () => {
-  return `
+export const playForm = (businessData = {}) => {
+    businessData = businessData || {};
+    return `
     <form id="combined-form" enctype="multipart/form-data">
-      <!-- Initial Business Form Fields -->
-      <div class="form-section">
-        <div class="form-toggle">
-          <label id="toggle-label">Company is currently <span id="toggle-status" style="color: red;">Inactive</span></label>
-          <input type="checkbox" id="active-toggle" name="active">
+        <!-- Initial Business Form Fields -->
+
+        <div class="form-section">
+            <!-- Business Details -->
+            ${renderBusinessDetailsSection()}
         </div>
-      </div>
-      <div class="form-section">
-        <!-- Business Details -->
-        ${renderBusinessDetailsSection()}
-      </div>
-      <div class="form-section">
-        <!-- Latitude, Longitude and Auto Fill -->
-        ${renderLatLongSection()}
-      </div>
-      <div class="form-section">
-        <!-- Contact Details -->
-        ${renderContactDetailsSection()}
-      </div>
-      <div class="form-section" id="social-media-section">
-        ${renderSocialMediaSection()}
-      </div>
-      <div class="form-section">
-        ${renderLogoUploadSection()}
-      </div>
-      <div class="form-section" id="image-upload-section">
-        ${renderImageUploadSection()}
-      </div>
-      <div class="form-section description-section">
-        ${renderDescriptionSection()}
-      </div>
-      <div class="form-section" id="menu-selection-section">
-        ${renderMenuSelectionSection()}
-      </div>
-      <div class="form-section">
-        <h3>Operational Hours</h3>
-        ${renderOperationalHoursSection()}
-      </div>
-      <div class="form-section special-day-section">
-        ${renderSpecialDaySection()}
-      </div>
-      <input type="hidden" id="businessId" name="businessId" value="">
-      <button type="button" id="submitButton">Submit</button>
+        <div class="form-section">
+            <!-- Latitude, Longitude and Auto Fill -->
+            ${renderLatLongSection()}
+        </div>
+        <div class="form-section">
+            <!-- Contact Details -->
+            ${renderContactDetailsSection()}
+        </div>
+        <div class="form-section" id="image-upload-section">
+            ${renderImageUploadSection()}
+        </div>
+        <div class="form-section description-section">
+            ${renderDescriptionSection()}
+        </div>
+        <div class="form-section" id="menu-selection-section">
+            ${renderMenuSelectionSection()}
+        </div>
+        <input type="hidden" id="businessId" name="businessId" value="">
+        
+        <div style="display: flex; gap: 10px;">
+            <button type="button" id="submitButton">Submit</button>
+            <button style="background-color: red;" type="button" id="cancelButton">Cancel</button>
+        </div>
     </form>
-  `;
+`;
 };
-
-// Rendering functions for different sections
-const renderBusinessDetailsSection = () => `
-    <div class="form-group">
-        <label for="businessName">Business Name:</label>
-        <input type="text" id="businessName" name="businessName">
-    </div>
-    <div class="form-group">
-        <label for="streetAddress">Street Address:</label>
-        <input type="text" id="streetAddress" name="streetAddress">
-    </div>
-    <div class="form-group">
-        <label for="mailingAddress">Mailing Address:</label>
-        <input type="text" id="mailingAddress" name="mailingAddress">
-    </div>
-    <div class="form-group">
-        <label for="city">City:</label>
-        <input type="text" id="city" name="city">
-    </div>
-    <div class="form-group">
-        <label for="state">State:</label>
-        <input type="text" id="state" name="state">
-    </div>
-    <div class="form-group">
-        <label for="zipCode">Zip Code:</label>
-        <input type="text" id="zipCode" name="zipCode">
-    </div>
-`;
-
-const renderLatLongSection = () => `
-    <div class="form-group">
-        <label for="latitude">Latitude:</label>
-        <input type="text" id="latitude" name="latitude" readonly>
-    </div>
-    <div class="form-group">
-        <label for="longitude">Longitude:</label>
-        <input type="text" id="longitude" name="longitude" readonly>
-    </div>
-    <button type="button" id="autofill-button">Auto Fill</button>
-`;
-
-const renderContactDetailsSection = () => `
-    <div class="form-group">
-        <label for="phone">Phone:</label>
-        <input type="tel" id="phone" name="phone">
-    </div>
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email">
-    </div>
-    <div class="form-group">
-        <label for="website">Website:</label>
-        <input type="url" id="website" name="website">
-    </div>
-`;
-
-const renderSocialMediaSection = () => `
-    <div class="form-group">
-        <label for="socialPlatform">Social Platform:</label>
-        <input type="text" id="socialPlatform" name="socialPlatform">
-    </div>
-    <div class="form-group">
-        <label for="socialAddress">Social Address:</label>
-        <input type="text" id="socialAddress" name="socialAddress">
-    </div>
-    <button type="button" id="add-social-media">Add</button>
-    <ul id="social-media-list"></ul>
-`;
-
-const renderLogoUploadSection = () => `
-    <div class="form-group">
-        <label for="logoUpload">Business Logo:</label>
-        <input type="file" id="logoUpload" name="logoUrl" accept="image/*">
-    </div>
-    <div id="logo-preview" class="thumbnail-container"></div>
-`;
-
-const renderImageUploadSection = () => `
-    <div class="form-group">
-        <label for="imageUpload">Upload Images:</label>
-        <input type="file" id="imageUpload" name="imageUrls" multiple>
-    </div>
-    <div id="image-thumbnails"></div>
-    <ul id="image-file-list"></ul>
-`;
-
-const renderDescriptionSection = () => `
-    <div class="description-container">
-        <label for="description">Business Description:</label>
-        <textarea id="description" class="description" name="description"></textarea>
-    </div>
-`;
-
-const renderMenuSelectionSection = () => `
-    <div style="display: flex; flex-direction: row; gap: 20px; width: 100%;">
-        <div class="form-group">
-            <label for="menuType">Menu Type:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="menuType" name="menuType"></select>
-                <button type="button" id="add-menu-type">Add Selection</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="newMenuType">New Menu Type:</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <input type="text" id="newMenuType" name="newMenuType">
-                <button type="button" id="add-new-menu-type">Add</button>
-            </div>
-        </div>
-    </div>
-    <ul id="menu-type-list"></ul>
-`;
-
-const renderOperationalHoursSection = () => `
-    <h3>Operational Hours</h3>
-    <table class="hours-table">
-        <thead>
-            <tr>
-                <th>Day</th>
-                <th>Hours</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Monday</td>
-                <td><input type="text" id="hours-monday" name="hours-monday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-            <tr>
-                <td>Tuesday</td>
-                <td><input type="text" id="hours-tuesday" name="hours-tuesday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-            <tr>
-                <td>Wednesday</td>
-                <td><input type="text" id="hours-wednesday" name="hours-wednesday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-            <tr>
-                <td>Thursday</td>
-                <td><input type="text" id="hours-thursday" name="hours-thursday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-            <tr>
-                <td>Friday</td>
-                <td><input type="text" id="hours-friday" name="hours-friday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-            <tr>
-                <td>Saturday</td>
-                <td><input type="text" id="hours-saturday" name="hours-saturday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-            <tr>
-                <td>Sunday</td>
-                <td><input type="text" id="hours-sunday" name="hours-sunday" placeholder="e.g. 9:00 AM - 5:00 PM"></td>
-            </tr>
-        </tbody>
-    </table>
-`;
-
-const renderSpecialDaySection = () => `
-    <div class="special-day-container">
-        <label for="special-day">Special Day:</label>
-        <input type="text" id="special-day" class="special-day" name="special-day" />
-    </div>
-    <div class="altered-hours-container">
-        <label for="altered-hours">Altered Hours:</label>
-        <input type="text" id="altered-hours" class="altered-hours" name="altered-hours" />
-    </div>
-    <div class="add-day-container">
-        <button type="button" id="add-day-button">Add Day</button>
-    </div>
-    <div class="day-hours-list" id="day-hours-list"></div>
-`;
 
 // Event Listeners and Handlers
 
@@ -331,59 +156,90 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 };
 
 // Image upload handling
-export const attachImageUploadHandler = (formContainer, existingImageUrls = []) => {
-    if (!Array.isArray(existingImageUrls)) {
-        existingImageUrls = []; // Ensure it's an array
-    }
+export const attachImageUploadHandler = (formContainer, existingImages ) => {
+    existingImages = Array.isArray(existingImages) ? existingImages : [];
 
     const imageUploadInput = formContainer.querySelector('#imageUpload');
     const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
     const imageFileListContainer = formContainer.querySelector('#image-file-list');
 
-    // Initialize formContainer.imageUrls with existing images, ensuring no duplicates
-    formContainer.imageUrls = [...new Set(existingImageUrls)];
+    // Initialize imageUrls with existing images
+    formContainer.imageUrls = [...existingImages];
+    console.log('image url after push to formContainer: ', formContainer.imageUrls)
 
-    // Display existing images
-    existingImageUrls.forEach(url => {
-        displayImage(url, imageThumbnailsContainer, formContainer);
-    });
+    // Function to display images (both existing and new)
+    const displayImage = (url, fileName, file = null, isExisting = false) => {
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.className = 'thumbnail-container';
 
-    // Define the event listener function before using it
-    const handleImageUpload = async () => {
-        const files = imageUploadInput.files;
+        const img = document.createElement('img');
+        img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
+        img.alt = fileName;
+        img.className = 'thumbnail';
 
-        // Avoid adding the same image multiple times
-        for (const file of files) {
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'remove-button';
+        removeButton.addEventListener('click', () => {
+            const index = formContainer.imageUrls.indexOf(isExisting ? url : `uploads/${fileName}`);
+            if (index > -1) {
+                formContainer.imageUrls.splice(index, 1);
+            }
+            imageThumbnailsContainer.removeChild(thumbnailContainer);
+            imageFileListContainer.removeChild(listItem);
+        });
+
+        thumbnailContainer.appendChild(img);
+        thumbnailContainer.appendChild(removeButton);
+        imageThumbnailsContainer.appendChild(thumbnailContainer);
+
+        const listItem = document.createElement('li');
+        listItem.textContent = fileName;
+        imageFileListContainer.appendChild(listItem);
+
+        if (file) {
+            // Upload new file and update imageUrls
             const uniqueFilename = getUniqueFilename(file.name);
             const imageFormData = new FormData();
             imageFormData.append('imageFiles[]', file, uniqueFilename);
 
-            try {
-                const uploadResult = await uploadFilesToDreamHost(imageFormData);
-                if (uploadResult && uploadResult[0]) {
-                    const newUrl = `uploads/${uniqueFilename}`;
-                    if (!formContainer.imageUrls.includes(newUrl)) {
-                        formContainer.imageUrls.push(newUrl);
-                        console.log('Image URLs after adding new image:', formContainer.imageUrls);
-
-                        // Display the newly uploaded image
-                        displayImage(newUrl, imageThumbnailsContainer, formContainer);
+            uploadFilesToDreamHost(imageFormData)
+                .then((uploadResult) => {
+                    if (uploadResult && uploadResult[0]) {
+                        formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
+                        console.log('Image URLs:', formContainer.imageUrls);
+                    } else {
+                        console.error('Failed to upload image:', uploadResult);
                     }
-                } else {
-                    console.error('Failed to upload image:', uploadResult);
-                }
-            } catch (error) {
-                console.error('Error during image upload:', error);
-            }
+                })
+                .catch((error) => {
+                    console.error('Error during image upload:', error);
+                });
+        } else {
+            console.log('Loaded existing image:', url);
         }
-
-        // Clear the input after handling to prevent reprocessing the same files
-        imageUploadInput.value = '';
     };
 
-    // Attach the event listener only once
-    imageUploadInput.removeEventListener('change', handleImageUpload);
-    imageUploadInput.addEventListener('change', handleImageUpload);
+    // Display existing images
+    existingImages.forEach((imageUrl) => {
+        const fileName = imageUrl.split('/').pop();
+        displayImage(imageUrl, fileName, null, true);
+    });
+
+    // Handle new image uploads
+    if (imageUploadInput) {
+        imageUploadInput.addEventListener('change', () => {
+            const files = imageUploadInput.files;
+
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    displayImage(e.target.result, file.name, file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 };
 
 // Display functions for Logo and Image
@@ -409,30 +265,6 @@ function displayLogo(url, container, formContainer, file = null) {
     }
 }
 
-function displayImage(url, container, formContainer, file = null) {
-    const img = document.createElement('img');
-    img.src = url.startsWith('data:') ? url : `https://douglas.365easyflow.com/easyflow-images/${url}`;
-    img.className = 'thumbnail';
-
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.className = 'remove-button';
-    removeButton.addEventListener('click', () => {
-        container.removeChild(img);
-        container.removeChild(removeButton);
-        formContainer.imageUrls = formContainer.imageUrls.filter(imageUrl => imageUrl !== url); // Remove from the list
-    });
-
-    container.appendChild(img);
-    container.appendChild(removeButton);
-
-    if (file) {
-        uploadFile(file, formContainer, 'image');
-    } else {
-        formContainer.imageUrls.push(url); // Keep existing URL
-    }
-}
-
 const initializeTinyMCE = (selector, content = '') => {
     tinymce.init({
         selector: selector,
@@ -450,42 +282,25 @@ const initializeTinyMCE = (selector, content = '') => {
 };
 
 export const initializePlayForm = async (formContainer, businessData = null) => {
+    const formElement = formContainer.querySelector('#combined-form');
+
+    if (!formElement) {
+        console.error('Form element not found in formContainer');
+        return;
+    }
+
     if (!formContainer.imageUrls) {
         formContainer.imageUrls = [];
     }
 
-    console.log('Received businessData in playForm:', businessData);
-    console.log('initializePlayForm called with formContainer:', formContainer);
     attachCoordinatesHandler(formContainer);
     attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
     attachLogoUploadHandler(formContainer, businessData ? businessData.logoUrl : '');
     attachImageUploadHandler(formContainer, businessData ? businessData.images : []);
     initializeTinyMCE('#description', businessData ? businessData.description : '');
-    attachSpecialDayHandlers(formContainer, businessData ? businessData.specialDays : []);
+    //initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
 
-    // Update the checkbox and status label based on `businessData`
-    const activeToggle = formContainer.querySelector('#active-toggle');
-    const toggleStatus = formContainer.querySelector('#toggle-status');
-
-    if (businessData && businessData.active) {
-        activeToggle.checked = true;
-        toggleStatus.textContent = 'Active';
-        toggleStatus.style.color = 'green';
-    } else {
-        activeToggle.checked = false;
-        toggleStatus.textContent = 'Inactive';
-        toggleStatus.style.color = 'red';
-    }
-
-    activeToggle.addEventListener('change', () => {
-        if (activeToggle.checked) {
-            toggleStatus.textContent = 'Active';
-            toggleStatus.style.color = 'green';
-        } else {
-            toggleStatus.textContent = 'Inactive';
-            toggleStatus.style.color = 'red';
-        }
-    });
+    renderAndInitializeFormStatusToggle(formElement, businessData);
 };
 
 export const initializePlayFormWrapper = (formContainer, businessData) => {
@@ -501,12 +316,29 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
     const menuTypeList = formContainer.querySelector('#menu-type-list');
     const addMenuTypeButton = formContainer.querySelector('#add-menu-type');
     const addNewMenuTypeButton = formContainer.querySelector('#add-new-menu-type');
-    const newMenuTypeInput = formContainer.querySelector('#newMenuType');
+    const newMenuTypeInput = formContainer.querySelector('#newMenuType'); // Ensure this exists
+
+    // Check if elements are available
+    if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton || !newMenuTypeInput) {
+        console.error('One or more elements not found for Menu Selection initialization');
+        console.log({ menuTypeDropdown, menuTypeList, addMenuTypeButton, newMenuTypeInput });
+        return;
+    }
+
+    document.getElementById('cancelButton').addEventListener('click', () => {
+        window.history.back();
+    });
 
     const menuTypes = [];
 
+    // Fetch and populate the menu type dropdown
     const fetchedMenuTypes = await getMenuTypes();
+    console.log('Fetched Menu Types:', fetchedMenuTypes);
+
     if (fetchedMenuTypes && Array.isArray(fetchedMenuTypes)) {
+        // Clear dropdown before populating
+        menuTypeDropdown.innerHTML = '';
+        
         fetchedMenuTypes.forEach(type => {
             const option = document.createElement('option');
             option.value = type.id;
@@ -514,31 +346,45 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
             menuTypeDropdown.appendChild(option);
         });
 
+        // Populate the selected menu types in the list
         selectedMenuTypes.forEach(selectedTypeId => {
             const type = fetchedMenuTypes.find(t => String(t.id) === String(selectedTypeId));
             if (type) {
-                const listItem = createMenuListItem(type.name, type.id);
-                menuTypeList.appendChild(listItem);
-                menuTypes.push({ id: type.id, name: type.name });
+                const existingItem = menuTypeList.querySelector(`li[data-id="${type.id}"]`);
+                if (!existingItem) {
+                    const listItem = createMenuListItem(type.name, type.id);
+                    menuTypeList.appendChild(listItem);
+                    menuTypes.push({ id: type.id, name: type.name });
+                }
             }
         });
     } else {
         console.error('Error fetching menu types:', fetchedMenuTypes);
     }
 
+    // Add event listener for "Add Selection" button
     addMenuTypeButton.addEventListener('click', () => {
         const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
         if (selectedOption) {
+            const existingItem = menuTypeList.querySelector(`li[data-id="${selectedOption.value}"]`);
+            if (existingItem) {
+                console.log('This menu type is already added.');
+                return; // Prevent adding duplicates
+            }
+
             const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
             menuTypeList.appendChild(listItem);
             menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
+
+            console.log('Menu Types after addition:', menuTypes);
         }
     });
 
+    // Add event listener for "Add New Menu Type" button
     addNewMenuTypeButton.addEventListener('click', async () => {
         const newMenuType = newMenuTypeInput.value.trim();
         if (newMenuType) {
-            const response = await addNewMenuType(newMenuType);
+            const response = await addNewMenuType(newMenuType); // Ensure addNewMenuType is defined
             if (response && response.id) {
                 const option = document.createElement('option');
                 option.value = response.id;
@@ -558,9 +404,11 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
 
     formContainer.menuTypes = menuTypes;
 
+    // Helper function to create the list item
     function createMenuListItem(name, id) {
         const listItem = document.createElement('li');
         listItem.textContent = name;
+        listItem.dataset.id = id; // Ensure to set a data attribute for the id
         const removeButton = document.createElement('button');
         removeButton.textContent = 'x';
         removeButton.style.color = 'red';
@@ -574,6 +422,38 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
         });
         listItem.appendChild(removeButton);
         return listItem;
+    }
+};
+
+// Fetch menu types from the backend
+export const getMenuTypes = async () => {
+    const tableName = `play_type`;
+    try {
+        const response = await apiService.fetch(`menu-types?table=${tableName}`);
+        console.log('Menu Types API response:', response);
+        return response;
+    } catch (error) {
+        console.error(`Error fetching menu types:`, error);
+        return [];
+    }
+};
+
+// Add new menu type to the backend
+export const addNewMenuType = async (newMenuType) => {
+    const tableName = `play_type`;
+    try {
+        const response = await apiService.fetch('menu-types', {
+            method: 'POST',
+            body: JSON.stringify({ name: newMenuType, table: tableName }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('New Menu Type API response:', response);
+        return response;
+    } catch (error) {
+        console.error(`Error adding new menu type:`, error);
+        return { id: Date.now(), name: newMenuType }; // Fallback in case of error
     }
 };
 
@@ -605,18 +485,6 @@ export const attachSpecialDayHandlers = (formContainer, existingSpecialDays = []
         });
 
         formContainer.specialDays = specialDays;
-    }
-};
-
-// Fetch menu types from the backend
-export const getMenuTypes = async () => {
-    const tableName = `play_type`;
-    try {
-        const response = await apiService.fetch(`menu-types?table=${tableName}`);
-        return response;
-    } catch (error) {
-        console.error(`Error fetching menu types:`, error);
-        return [];
     }
 };
 
