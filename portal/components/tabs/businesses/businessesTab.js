@@ -431,9 +431,6 @@ formContainer.imageUrls.forEach(url => {
     thumbnailContainer.appendChild(removeButton);
     imageThumbnailsContainer.appendChild(thumbnailContainer);
 });
-
-
-
     
         // Handle Menu Types
         if (Array.isArray(businessData.menuTypes)) {

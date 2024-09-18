@@ -14,7 +14,7 @@ const renderMenuSelectionSection = () => `
                 <button type="button" id="add-new-menu-type">Add</button>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="display: none;>
             <label for="averageCost">Average Cost:</label>
             <div style="display: flex; align-items: center; gap: 10px;">
                 <select id="averageCost" name="averageCost"></select>

@@ -4,12 +4,9 @@ import { renderAndInitializeFormStatusToggle } from './formParts/formStatusToggl
 import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
 import renderLatLongSection from './formParts/latLongSection.js';
 import renderContactDetailsSection from './formParts/contactDetailsSection.js';
-import renderSocialMediaSection from './formParts/socialMediaSection.js';
-import renderLogoUploadSection from './formParts/logoUploadSection.js';
 import renderImageUploadSection from './formParts/imageUploadSection.js';
 import renderDescriptionSection from './formParts/descriptionSection.js';
 import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
-import renderSpecialDaySection from './formParts/specialDaySection.js';
 
 const apiService = new ApiService();
 
@@ -17,43 +14,38 @@ const apiService = new ApiService();
 export const eatForm = (businessData = {}) => {
     businessData = businessData || {};
     return `
-        <form id="combined-form" enctype="multipart/form-data">
-            <!-- Initial Business Form Fields -->
-            
-            <div class="form-section">
-                <!-- Business Details -->
-                ${renderBusinessDetailsSection()}
-            </div>
-            <div class="form-section">
-                <!-- Latitude, Longitude and Auto Fill -->
-                ${renderLatLongSection()}
-            </div>
-            <div class="form-section">
-                <!-- Contact Details -->
-                ${renderContactDetailsSection()}
-            </div>
-            <div class="form-section" id="social-media-section">
-                ${renderSocialMediaSection()}
-            </div>
-            <div class="form-section">
-                ${renderLogoUploadSection()}
-            </div>
-            <div class="form-section" id="image-upload-section">
-                ${renderImageUploadSection()}
-            </div>
-            <div class="form-section description-section">
-                ${renderDescriptionSection()}
-            </div>
-            <div class="form-section" id="menu-selection-section">
-                ${renderMenuSelectionSection()}
-            </div>
-            <div class="form-section special-day-section">
-                ${renderSpecialDaySection()}
-            </div>
-            <input type="hidden" id="businessId" name="businessId" value="">
+    <form id="combined-form" enctype="multipart/form-data">
+        <!-- Initial Business Form Fields -->
+
+        <div class="form-section">
+            <!-- Business Details -->
+            ${renderBusinessDetailsSection()}
+        </div>
+        <div class="form-section">
+            <!-- Latitude, Longitude and Auto Fill -->
+            ${renderLatLongSection()}
+        </div>
+        <div class="form-section">
+            <!-- Contact Details -->
+            ${renderContactDetailsSection()}
+        </div>
+        <div class="form-section" id="image-upload-section">
+            ${renderImageUploadSection()}
+        </div>
+        <div class="form-section description-section">
+            ${renderDescriptionSection()}
+        </div>
+        <div class="form-section" id="menu-selection-section">
+            ${renderMenuSelectionSection()}
+        </div>
+        <input type="hidden" id="businessId" name="businessId" value="">
+        
+        <div style="display: flex; gap: 10px;">
             <button type="button" id="submitButton">Submit</button>
-        </form>
-    `;
+            <button style="background-color: red;" type="button" id="cancelButton">Cancel</button>
+        </div>
+    </form>
+`;
 };
 
 // Coordinate handling
@@ -276,30 +268,6 @@ function displayLogo(url, container, formContainer, file = null) {
     }
 }
 
-function displayImage(url, container, formContainer, file = null) {
-    const img = document.createElement('img');
-    img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
-    img.className = 'thumbnail';
-
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.className = 'remove-button';
-    removeButton.addEventListener('click', () => {
-        container.removeChild(img);
-        container.removeChild(removeButton);
-        formContainer.imageUrls = formContainer.imageUrls.filter(imageUrl => imageUrl !== url); // Remove from the list
-    });
-
-    container.appendChild(img);
-    container.appendChild(removeButton);
-
-    if (file) {
-        uploadFile(file, formContainer, 'image');
-    } else {
-        formContainer.imageUrls.push(url); // Keep existing URL
-    }
-}
-
 const initializeAverageCostDropdown = async (formContainer, selectedCost = null) => {
     const averageCostDropdown = formContainer.querySelector('#averageCost');
     
@@ -328,7 +296,6 @@ const initializeAverageCostDropdown = async (formContainer, selectedCost = null)
 
 // Initialize form components
 export const initializeEatForm = (formContainer, businessData) => {
-
     const formElement = formContainer.querySelector('#combined-form');
 
     if (!formElement) {
@@ -336,17 +303,9 @@ export const initializeEatForm = (formContainer, businessData) => {
         return;
     }
 
-    console.log('formElement before calling renderAndInitializeFormStatusToggle:', formElement);
-    console.log('Type of formElement:', typeof formElement);
-    console.log('Is formElement an instance of Element?', formElement instanceof Element);
-    console.log('Does formElement have insertBefore?', typeof formElement.insertBefore);
-
     if (!formContainer.imageUrls) {
         formContainer.imageUrls = [];
     }
-
-    console.log('Received businessData in eatForm:', businessData);
-    console.log('initializeEatForm called with formContainer:', formContainer);
 
     attachCoordinatesHandler(formContainer);
     attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
@@ -392,15 +351,22 @@ export const initializeEatFormWrapper = (formContainer, businessData = {}) => {
 
 // Menu Selection logic
 export const initializeMenuSelection = async (formContainer, selectedMenuTypes = []) => {
-    console.log('Initializing menu selection with:', { formContainer, selectedMenuTypes });
     const menuTypeDropdown = formContainer.querySelector('#menuType');
     const menuTypeList = formContainer.querySelector('#menu-type-list');
     const addMenuTypeButton = formContainer.querySelector('#add-menu-type');
+    const addNewMenuTypeButton = formContainer.querySelector('#add-new-menu-type');
+    const newMenuTypeInput = formContainer.querySelector('#newMenuType'); // Ensure this exists
 
-    if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton) {
+    // Check if elements are available
+    if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton || !newMenuTypeInput) {
         console.error('One or more elements not found for Menu Selection initialization');
+        console.log({ menuTypeDropdown, menuTypeList, addMenuTypeButton, newMenuTypeInput });
         return;
     }
+
+    document.getElementById('cancelButton').addEventListener('click', () => {
+        window.history.back();
+    });
 
     const menuTypes = [];
 
@@ -409,6 +375,9 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
     console.log('Fetched Menu Types:', fetchedMenuTypes);
 
     if (fetchedMenuTypes && Array.isArray(fetchedMenuTypes)) {
+        // Clear dropdown before populating
+        menuTypeDropdown.innerHTML = '';
+        
         fetchedMenuTypes.forEach(type => {
             const option = document.createElement('option');
             option.value = type.id;
@@ -416,8 +385,7 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
             menuTypeDropdown.appendChild(option);
         });
 
-        //console.log('Selected Menu Types (from businessData I hope):', businessData);
-
+        // Populate the selected menu types in the list
         selectedMenuTypes.forEach(selectedTypeId => {
             const type = fetchedMenuTypes.find(t => String(t.id) === String(selectedTypeId));
             if (type) {
@@ -433,7 +401,7 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
         console.error('Error fetching menu types:', fetchedMenuTypes);
     }
 
-    // Add event listener for adding new selections
+    // Add event listener for "Add Selection" button
     addMenuTypeButton.addEventListener('click', () => {
         const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
         if (selectedOption) {
@@ -442,12 +410,34 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
                 console.log('This menu type is already added.');
                 return; // Prevent adding duplicates
             }
-    
+
             const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
             menuTypeList.appendChild(listItem);
             menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
-    
+
             console.log('Menu Types after addition:', menuTypes);
+        }
+    });
+
+    // Add event listener for "Add New Menu Type" button
+    addNewMenuTypeButton.addEventListener('click', async () => {
+        const newMenuType = newMenuTypeInput.value.trim();
+        if (newMenuType) {
+            const response = await addNewMenuType(newMenuType); // Ensure addNewMenuType is defined
+            if (response && response.id) {
+                const option = document.createElement('option');
+                option.value = response.id;
+                option.textContent = newMenuType;
+                menuTypeDropdown.appendChild(option);
+
+                const listItem = createMenuListItem(newMenuType, response.id);
+                menuTypeList.appendChild(listItem);
+                menuTypes.push({ id: response.id, name: newMenuType });
+
+                newMenuTypeInput.value = ''; // Clear the input field
+            } else {
+                console.error('Error adding new menu type:', response);
+            }
         }
     });
 
@@ -457,6 +447,7 @@ export const initializeMenuSelection = async (formContainer, selectedMenuTypes =
     function createMenuListItem(name, id) {
         const listItem = document.createElement('li');
         listItem.textContent = name;
+        listItem.dataset.id = id; // Ensure to set a data attribute for the id
         const removeButton = document.createElement('button');
         removeButton.textContent = 'x';
         removeButton.style.color = 'red';
@@ -478,12 +469,33 @@ export const getMenuTypes = async () => {
     const tableName = `eat_type`;
     try {
         const response = await apiService.fetch(`menu-types?table=${tableName}`);
+        console.log('Menu Types API response:', response);
         return response;
     } catch (error) {
         console.error(`Error fetching menu types:`, error);
         return [];
     }
 };
+
+// Add new menu type to the backend
+export const addNewMenuType = async (newMenuType) => {
+    const tableName = `eat_type`;
+    try {
+        const response = await apiService.fetch('menu-types', {
+            method: 'POST',
+            body: JSON.stringify({ name: newMenuType, table: tableName }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('New Menu Type API response:', response);
+        return response;
+    } catch (error) {
+        console.error(`Error adding new menu type:`, error);
+        return { id: Date.now(), name: newMenuType }; // Fallback in case of error
+    }
+};
+
 
 // Fetch average costs from the backend
 export const getAverageCosts = async () => {

@@ -4,53 +4,40 @@ import config from '../../../../utils/config.js';
 const apiService = new ApiService();
 
 export const shopForm = () => {
+    businessData = businessData || {};
     return `
-        <form id="combined-form" enctype="multipart/form-data">
-            <!-- Initial Business Form Fields -->
-            <div class="form-section">
-                <div class="form-toggle">
-                    <label id="toggle-label">Company is currently <span id="toggle-status" style="color: red;">Inactive</span></label>
-                    <input type="checkbox" id="active-toggle" name="active">
-                </div>
-            </div>
-            <div class="form-section">
-                <!-- Business Details -->
-                ${renderBusinessDetailsSection()}
-            </div>
-            <div class="form-section">
-                <!-- Latitude, Longitude and Auto Fill -->
-                ${renderLatLongSection()}
-            </div>
-            <div class="form-section">
-                <!-- Contact Details -->
-                ${renderContactDetailsSection()}
-            </div>
-            <div class="form-section" id="social-media-section">
-                ${renderSocialMediaSection()}
-            </div>
-            <div class="form-section">
-                ${renderLogoUploadSection()}
-            </div>
-            <div class="form-section" id="image-upload-section">
-                ${renderImageUploadSection()}
-            </div>
-            <div class="form-section description-section">
-                ${renderDescriptionSection()}
-            </div>
-            <div class="form-section" id="menu-selection-section">
-                ${renderMenuSelectionSection()}
-            </div>
-            <div class="form-section">
-                <h3>Operational Hours</h3>
-                ${renderOperationalHoursSection()}
-            </div>
-            <div class="form-section special-day-section">
-                ${renderSpecialDaySection()}
-            </div>
-            <input type="hidden" id="businessId" name="businessId" value="">
+    <form id="combined-form" enctype="multipart/form-data">
+        <!-- Initial Business Form Fields -->
+
+        <div class="form-section">
+            <!-- Business Details -->
+            ${renderBusinessDetailsSection()}
+        </div>
+        <div class="form-section">
+            <!-- Latitude, Longitude and Auto Fill -->
+            ${renderLatLongSection()}
+        </div>
+        <div class="form-section">
+            <!-- Contact Details -->
+            ${renderContactDetailsSection()}
+        </div>
+        <div class="form-section" id="image-upload-section">
+            ${renderImageUploadSection()}
+        </div>
+        <div class="form-section description-section">
+            ${renderDescriptionSection()}
+        </div>
+        <div class="form-section" id="menu-selection-section">
+            ${renderMenuSelectionSection()}
+        </div>
+        <input type="hidden" id="businessId" name="businessId" value="">
+        
+        <div style="display: flex; gap: 10px;">
             <button type="button" id="submitButton">Submit</button>
-        </form>
-    `;
+            <button style="background-color: red;" type="button" id="cancelButton">Cancel</button>
+        </div>
+    </form>
+`;
 };
 
 // Rendering functions for different sections
@@ -328,59 +315,93 @@ export const attachLogoUploadHandler = (formContainer, existingLogoUrl = '') => 
 };
 
 // Image upload handling
-export const attachImageUploadHandler = (formContainer, existingImageUrls = []) => {
-  if (!Array.isArray(existingImageUrls)) {
-      existingImageUrls = []; // Ensure it's an array
-  }
+export const attachImageUploadHandler = (formContainer, existingImages ) => {
+    console.log('image url passing into attachImageUploadHandler: ', existingImages)
+    // Ensure existingImages is always an array
+    existingImages = Array.isArray(existingImages) ? existingImages : [];
+    console.log('image url passing after existingImages reasignment: ', existingImages)
 
-  const imageUploadInput = formContainer.querySelector('#imageUpload');
-  const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
-  const imageFileListContainer = formContainer.querySelector('#image-file-list');
+    const imageUploadInput = formContainer.querySelector('#imageUpload');
+    const imageThumbnailsContainer = formContainer.querySelector('#image-thumbnails');
+    const imageFileListContainer = formContainer.querySelector('#image-file-list');
 
-  // Initialize formContainer.imageUrls with existing images, ensuring no duplicates
-  formContainer.imageUrls = [...new Set(existingImageUrls)];
+    // Initialize imageUrls with existing images
+    formContainer.imageUrls = [...existingImages];
+    console.log('image url after push to formContainer: ', formContainer.imageUrls)
 
-  // Display existing images
-  existingImageUrls.forEach(url => {
-      displayImage(url, imageThumbnailsContainer, formContainer);
-  });
+    // Function to display images (both existing and new)
+    const displayImage = (url, fileName, file = null, isExisting = false) => {
+        const thumbnailContainer = document.createElement('div');
+        thumbnailContainer.className = 'thumbnail-container';
 
-  // Define the event listener function before using it
-  const handleImageUpload = async () => {
-      const files = imageUploadInput.files;
+        const img = document.createElement('img');
+        img.src = url.startsWith('data:') ? url : `https://elbert.365easyflow.com/easyflow-images/${url}`;
+        img.alt = fileName;
+        img.className = 'thumbnail';
 
-      // Avoid adding the same image multiple times
-      for (const file of files) {
-          const uniqueFilename = getUniqueFilename(file.name);
-          const imageFormData = new FormData();
-          imageFormData.append('imageFiles[]', file, uniqueFilename);
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.className = 'remove-button';
+        removeButton.addEventListener('click', () => {
+            const index = formContainer.imageUrls.indexOf(isExisting ? url : `uploads/${fileName}`);
+            if (index > -1) {
+                formContainer.imageUrls.splice(index, 1);
+            }
+            imageThumbnailsContainer.removeChild(thumbnailContainer);
+            imageFileListContainer.removeChild(listItem);
+        });
 
-          try {
-              const uploadResult = await uploadFilesToDreamHost(imageFormData);
-              if (uploadResult && uploadResult[0]) {
-                  const newUrl = `uploads/${uniqueFilename}`;
-                  if (!formContainer.imageUrls.includes(newUrl)) {
-                      formContainer.imageUrls.push(newUrl);
-                      console.log('Image URLs after adding new image:', formContainer.imageUrls);
+        thumbnailContainer.appendChild(img);
+        thumbnailContainer.appendChild(removeButton);
+        imageThumbnailsContainer.appendChild(thumbnailContainer);
 
-                      // Display the newly uploaded image
-                      displayImage(newUrl, imageThumbnailsContainer, formContainer);
-                  }
-              } else {
-                  console.error('Failed to upload image:', uploadResult);
-              }
-          } catch (error) {
-              console.error('Error during image upload:', error);
-          }
-      }
+        const listItem = document.createElement('li');
+        listItem.textContent = fileName;
+        imageFileListContainer.appendChild(listItem);
 
-      // Clear the input after handling to prevent reprocessing the same files
-      imageUploadInput.value = '';
-  };
+        if (file) {
+            // Upload new file and update imageUrls
+            const uniqueFilename = getUniqueFilename(file.name);
+            const imageFormData = new FormData();
+            imageFormData.append('imageFiles[]', file, uniqueFilename);
 
-  // Attach the event listener only once
-  imageUploadInput.removeEventListener('change', handleImageUpload);
-  imageUploadInput.addEventListener('change', handleImageUpload);
+            uploadFilesToDreamHost(imageFormData)
+                .then((uploadResult) => {
+                    if (uploadResult && uploadResult[0]) {
+                        formContainer.imageUrls.push(`uploads/${uniqueFilename}`);
+                        console.log('Image URLs:', formContainer.imageUrls);
+                    } else {
+                        console.error('Failed to upload image:', uploadResult);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error during image upload:', error);
+                });
+        } else {
+            console.log('Loaded existing image:', url);
+        }
+    };
+
+    // Display existing images
+    existingImages.forEach((imageUrl) => {
+        const fileName = imageUrl.split('/').pop();
+        displayImage(imageUrl, fileName, null, true);
+    });
+
+    // Handle new image uploads
+    if (imageUploadInput) {
+        imageUploadInput.addEventListener('change', () => {
+            const files = imageUploadInput.files;
+
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    displayImage(e.target.result, file.name, file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 };
 
 // Display functions for Logo and Image
@@ -403,30 +424,6 @@ function displayLogo(url, container, formContainer, file = null) {
       uploadFile(file, formContainer, 'logo');
   } else {
       formContainer.logoUrl = url; // Keep existing URL
-  }
-}
-
-function displayImage(url, container, formContainer, file = null) {
-  const img = document.createElement('img');
-  img.src = url.startsWith('data:') ? url : `https://douglas.365easyflow.com/easyflow-images/${url}`;
-  img.className = 'thumbnail';
-
-  const removeButton = document.createElement('button');
-  removeButton.textContent = 'Remove';
-  removeButton.className = 'remove-button';
-  removeButton.addEventListener('click', () => {
-      container.removeChild(img);
-      container.removeChild(removeButton);
-      formContainer.imageUrls = formContainer.imageUrls.filter(imageUrl => imageUrl !== url); // Remove from the list
-  });
-
-  container.appendChild(img);
-  container.appendChild(removeButton);
-
-  if (file) {
-      uploadFile(file, formContainer, 'image');
-  } else {
-      formContainer.imageUrls.push(url); // Keep existing URL
   }
 }
 

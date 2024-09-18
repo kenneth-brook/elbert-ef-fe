@@ -4,54 +4,48 @@ import { renderAndInitializeFormStatusToggle } from './formParts/formStatusToggl
 import renderBusinessDetailsSection from './formParts/businessDetailsSection.js';
 import renderLatLongSection from './formParts/latLongSection.js';
 import renderContactDetailsSection from './formParts/contactDetailsSection.js';
-import renderSocialMediaSection from './formParts/socialMediaSection.js';
-import renderLogoUploadSection from './formParts/logoUploadSection.js';
 import renderImageUploadSection from './formParts/imageUploadSection.js';
 import renderDescriptionSection from './formParts/descriptionSection.js';
 import renderMenuSelectionSection from './formParts/menuSelectionSection.js';
-import renderSpecialDaySection from './formParts/specialDaySection.js';
 
 const apiService = new ApiService();
 
 // Main form template
 export const otherForm = (businessData = {}) => {
+    businessData = businessData || {};
     return `
-        <form id="combined-form" enctype="multipart/form-data">
-            <!-- Initial Business Form Fields -->
-            <div class="form-section">
-                <!-- Business Details -->
-                ${renderBusinessDetailsSection()}
-            </div>
-            <div class="form-section">
-                <!-- Latitude, Longitude and Auto Fill -->
-                ${renderLatLongSection()}
-            </div>
-            <div class="form-section">
-                <!-- Contact Details -->
-                ${renderContactDetailsSection()}
-            </div>
-            <div class="form-section" id="social-media-section">
-                ${renderSocialMediaSection()}
-            </div>
-            <div class="form-section">
-                ${renderLogoUploadSection()}
-            </div>
-            <div class="form-section" id="image-upload-section">
-                ${renderImageUploadSection()}
-            </div>
-            <div class="form-section description-section">
-                ${renderDescriptionSection()}
-            </div>
-            <div class="form-section" id="menu-selection-section">
-                ${renderMenuSelectionSection()}
-            </div>
-            <div class="form-section special-day-section" style="display: none;">
-                ${renderSpecialDaySection()}
-            </div>
-            <input type="hidden" id="businessId" name="businessId" value="">
+    <form id="combined-form" enctype="multipart/form-data">
+        <!-- Initial Business Form Fields -->
+
+        <div class="form-section">
+            <!-- Business Details -->
+            ${renderBusinessDetailsSection()}
+        </div>
+        <div class="form-section">
+            <!-- Latitude, Longitude and Auto Fill -->
+            ${renderLatLongSection()}
+        </div>
+        <div class="form-section">
+            <!-- Contact Details -->
+            ${renderContactDetailsSection()}
+        </div>
+        <div class="form-section" id="image-upload-section">
+            ${renderImageUploadSection()}
+        </div>
+        <div class="form-section description-section">
+            ${renderDescriptionSection()}
+        </div>
+        <div class="form-section" id="menu-selection-section">
+            ${renderMenuSelectionSection()}
+        </div>
+        <input type="hidden" id="businessId" name="businessId" value="">
+        
+        <div style="display: flex; gap: 10px;">
             <button type="button" id="submitButton">Submit</button>
-        </form>
-    `;
+            <button style="background-color: red;" type="button" id="cancelButton">Cancel</button>
+        </div>
+    </form>
+`;
 };
 
 // Coordinate handling
@@ -302,10 +296,6 @@ const initializeAverageCostDropdown = async (formContainer, selectedCost = null)
 
 // Initialize form components
 export const initializeOtherForm = (formContainer, businessData) => {
-    const existingImages = businessData.images || [];  // Ensure images are passed
-    console.log('Images passed to attachImageUploadHandler:', existingImages);
-
-
     const formElement = formContainer.querySelector('#combined-form');
 
     if (!formElement) {
@@ -313,19 +303,18 @@ export const initializeOtherForm = (formContainer, businessData) => {
         return;
     }
 
-    // Initialize imageUrls with existing data (from businessData)
-    formContainer.imageUrls = businessData.images || [];
+    if (!formContainer.imageUrls) {
+        formContainer.imageUrls = [];
+    }
 
-    // Populate other form fields
     attachCoordinatesHandler(formContainer);
     attachSocialMediaHandler(formContainer, businessData ? businessData.socialMedia : []);
     attachLogoUploadHandler(formContainer, businessData ? businessData.logoUrl : '');
-    attachImageUploadHandler(formContainer, existingImages, businessData ? businessData.images : []);
+    attachImageUploadHandler(formContainer, businessData ? businessData.images : []);
     initializeTinyMCE('#description', businessData ? businessData.description : '');
+    initializeAverageCostDropdown(formContainer, businessData ? businessData.cost : null);
 
     renderAndInitializeFormStatusToggle(formElement, businessData);
-
-    console.log('Form initialized with image URLs:', formContainer.imageUrls);
 };
 
 // TinyMCE initialization
@@ -360,99 +349,126 @@ export const initializeOtherFormWrapper = (formContainer, businessData) => {
 };
 
 // Menu Selection logic
-export const initializeMenuSelection = async (formContainer) => {
+export const initializeMenuSelection = async (formContainer, selectedMenuTypes = []) => {
     const menuTypeDropdown = formContainer.querySelector('#menuType');
-    const averageCostDropdown = formContainer.querySelector('#averageCost');
+    const menuTypeList = formContainer.querySelector('#menu-type-list');
     const addMenuTypeButton = formContainer.querySelector('#add-menu-type');
     const addNewMenuTypeButton = formContainer.querySelector('#add-new-menu-type');
-    const newMenuTypeInput = formContainer.querySelector('#newMenuType');
-    const menuTypeList = formContainer.querySelector('#menu-type-list');
-  
+    const newMenuTypeInput = formContainer.querySelector('#newMenuType'); // Ensure this exists
+
+    // Check if elements are available
+    if (!menuTypeDropdown || !menuTypeList || !addMenuTypeButton || !newMenuTypeInput) {
+        console.error('One or more elements not found for Menu Selection initialization');
+        console.log({ menuTypeDropdown, menuTypeList, addMenuTypeButton, newMenuTypeInput });
+        return;
+    }
+
+    document.getElementById('cancelButton').addEventListener('click', () => {
+        window.history.back();
+    });
+
     const menuTypes = [];
-  
+
+    // Fetch and populate the menu type dropdown
     const fetchedMenuTypes = await getMenuTypes();
+    console.log('Fetched Menu Types:', fetchedMenuTypes);
+
     if (fetchedMenuTypes && Array.isArray(fetchedMenuTypes)) {
-      fetchedMenuTypes.forEach(type => {
-        const option = document.createElement('option');
-        option.value = type.id;
-        option.textContent = type.name;
-        menuTypeDropdown.appendChild(option);
-      });
+        // Clear dropdown before populating
+        menuTypeDropdown.innerHTML = '';
+        
+        fetchedMenuTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = type.name;
+            menuTypeDropdown.appendChild(option);
+        });
+
+        // Populate the selected menu types in the list
+        selectedMenuTypes.forEach(selectedTypeId => {
+            const type = fetchedMenuTypes.find(t => String(t.id) === String(selectedTypeId));
+            if (type) {
+                const existingItem = menuTypeList.querySelector(`li[data-id="${type.id}"]`);
+                if (!existingItem) {
+                    const listItem = createMenuListItem(type.name, type.id);
+                    menuTypeList.appendChild(listItem);
+                    menuTypes.push({ id: type.id, name: type.name });
+                }
+            }
+        });
     } else {
-      console.error('Error fetching menu types:', fetchedMenuTypes);
+        console.error('Error fetching menu types:', fetchedMenuTypes);
     }
-  
-    const fetchedAverageCosts = await getAverageCosts();
-    if (fetchedAverageCosts && Array.isArray(fetchedAverageCosts)) {
-      fetchedAverageCosts.forEach(cost => {
-        const option = document.createElement('option');
-        option.value = cost.id;
-        option.textContent = `${cost.symbol} - ${cost.description}`;
-        averageCostDropdown.appendChild(option);
-      });
-    } else {
-      console.error('Error fetching average costs:', fetchedAverageCosts);
-    }
-  
+
+    // Add event listener for "Add Selection" button
     addMenuTypeButton.addEventListener('click', () => {
-      const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
-      if (selectedOption) {
-        const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
-        menuTypeList.appendChild(listItem);
-        menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
-      }
+        const selectedOption = menuTypeDropdown.options[menuTypeDropdown.selectedIndex];
+        if (selectedOption) {
+            const existingItem = menuTypeList.querySelector(`li[data-id="${selectedOption.value}"]`);
+            if (existingItem) {
+                console.log('This menu type is already added.');
+                return; // Prevent adding duplicates
+            }
+
+            const listItem = createMenuListItem(selectedOption.textContent, selectedOption.value);
+            menuTypeList.appendChild(listItem);
+            menuTypes.push({ id: selectedOption.value, name: selectedOption.textContent });
+
+            console.log('Menu Types after addition:', menuTypes);
+        }
     });
-  
+
+    // Add event listener for "Add New Menu Type" button
     addNewMenuTypeButton.addEventListener('click', async () => {
-      const newMenuType = newMenuTypeInput.value.trim();
-      if (newMenuType) {
-        const response = await addNewMenuType(newMenuType);
-        if (response && response.id) {
-          const option = document.createElement('option');
-          option.value = response.id;
-          option.textContent = newMenuType;
-          menuTypeDropdown.appendChild(option);
-  
-          const listItem = createMenuListItem(newMenuType, response.id);
-          menuTypeList.appendChild(listItem);
-          menuTypes.push({ id: response.id, name: newMenuType });
-  
-          newMenuTypeInput.value = '';
-        } else {
-          console.error('Error adding new menu type:', response);
+        const newMenuType = newMenuTypeInput.value.trim();
+        if (newMenuType) {
+            const response = await addNewMenuType(newMenuType); // Ensure addNewMenuType is defined
+            if (response && response.id) {
+                const option = document.createElement('option');
+                option.value = response.id;
+                option.textContent = newMenuType;
+                menuTypeDropdown.appendChild(option);
+
+                const listItem = createMenuListItem(newMenuType, response.id);
+                menuTypeList.appendChild(listItem);
+                menuTypes.push({ id: response.id, name: newMenuType });
+
+                newMenuTypeInput.value = ''; // Clear the input field
+            } else {
+                console.error('Error adding new menu type:', response);
+            }
         }
-      }
     });
-  
+
     formContainer.menuTypes = menuTypes;
-  
+
+    // Helper function to create the list item
     function createMenuListItem(name, id) {
-      const listItem = document.createElement('li');
-      listItem.textContent = name;
-      listItem.dataset.id = id;
-  
-      const removeButton = document.createElement('button');
-      removeButton.textContent = 'x';
-      removeButton.style.color = 'red';
-      removeButton.style.marginLeft = '10px';
-      removeButton.addEventListener('click', () => {
-        menuTypeList.removeChild(listItem);
-        const index = menuTypes.findIndex(type => type.id === id);
-        if (index > -1) {
-          menuTypes.splice(index, 1);
-        }
-      });
-  
-      listItem.appendChild(removeButton);
-      return listItem;
+        const listItem = document.createElement('li');
+        listItem.textContent = name;
+        listItem.dataset.id = id; // Ensure to set a data attribute for the id
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'x';
+        removeButton.style.color = 'red';
+        removeButton.style.marginLeft = '10px';
+        removeButton.addEventListener('click', () => {
+            menuTypeList.removeChild(listItem);
+            const index = menuTypes.findIndex(type => type.id === id);
+            if (index > -1) {
+                menuTypes.splice(index, 1);
+            }
+        });
+        listItem.appendChild(removeButton);
+        return listItem;
     }
-  };
+};
 
 // Fetch menu types from the backend
 export const getMenuTypes = async () => {
-    const tableName = `eat_type`;
+    const tableName = `other_type`;
     try {
         const response = await apiService.fetch(`menu-types?table=${tableName}`);
+        console.log('Menu Types API response:', response);
         return response;
     } catch (error) {
         console.error(`Error fetching menu types:`, error);
@@ -460,15 +476,22 @@ export const getMenuTypes = async () => {
     }
 };
 
-// Fetch average costs from the backend
-export const getAverageCosts = async () => {
-    const tableName = `eat_cost`;
+// Add new menu type to the backend
+export const addNewMenuType = async (newMenuType) => {
+    const tableName = `other_type`;
     try {
-        const response = await apiService.fetch(`average-costs?table=${tableName}`);
+        const response = await apiService.fetch('menu-types', {
+            method: 'POST',
+            body: JSON.stringify({ name: newMenuType, table: tableName }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('New Menu Type API response:', response);
         return response;
     } catch (error) {
-        console.error(`Error fetching average costs:`, error);
-        return [];
+        console.error(`Error adding new menu type:`, error);
+        return { id: Date.now(), name: newMenuType }; // Fallback in case of error
     }
 };
 
